@@ -10,19 +10,32 @@
 template <class T>
 class UniquePtr {
     public:
+        // Constructors
         constexpr UniquePtr() noexcept { /* TODO */ }
-        UniquePtr(const UniquePtr &other) { /* TODO */ }
-        UniquePtr(UniquePtr &&other) = delete;
-        operator=(const UniquePtr &other);
-        operator=(UniquePtr &&other) = delete;
-        ~UniquePtr() {
-            delete T;
-        }
+        explicit UniquePtr(T *ptr) noexcept { /* TODO */}
+        UniquePtr(const UniquePtr &other) noexcept { /* TODO */ }
+        UniquePtr(UniquePtr &&other) noexcept { /* TODO */ }
+        
+        // Destructor
+        ~UniquePtr() { /* TODO */ }
+        
+        // Assignment
+        UniquePtr& operator=(const UniquePtr &other) = delete;
+        UniquePtr& operator=(UniquePtr &&other) noexcept { /* TODO */ }
         
         T* release() noexcept { /* TODO */}
-        void reset(T *ptr=T()) noexcept { /* TODO */ } // This signature looks weird https://en.cppreference.com/w/cpp/memory/unique_ptr/reset.html
-        
+        // T*() == nullptr...
+        constexpr void reset(T *ptr=T*()) noexcept { /* TODO */ }
+        void swap(UniquePtr &other) noexcept { /* TODO */ }
+
+        T* get() const noexcept { /* TODO */ }
+        explicit operator bool() const noexcept { /* TODO */ }
+
+        T* operator->() const noexcept { /* TODO */ }
 
     private:
         T *m_ptr;
 };
+
+template<class T, class... Args>
+UniquePtr<T> make_unique(Args&&... args) {/* TODO */}
