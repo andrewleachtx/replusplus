@@ -23,6 +23,8 @@ enable_testing()
 add_executable(runTests tests/UniquePtr.cpp tests/WeakPtr.cpp tests/SharedPtr.cpp)
 target_link_libraries(runTests PRIVATE replusplus gtest_main)
 target_include_directories(runTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_options(runTests PRIVATE -fsanitize=address,leak,undefined -fno-omit-frame-pointer)
+target_link_libraries(runTests PRIVATE -fsanitize=address,leak,undefined)
 
 include(GoogleTest)
 gtest_discover_tests(runTests)

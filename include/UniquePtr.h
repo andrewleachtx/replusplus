@@ -16,7 +16,7 @@ class UniquePtr {
     public:
         // Constructors
         constexpr UniquePtr() noexcept : m_ptr(nullptr) {}
-        explicit UniquePtr([[maybe_unused]] T *ptr) noexcept : m_ptr(nullptr) {}
+        explicit UniquePtr(T *ptr) noexcept : m_ptr(ptr) {}
         UniquePtr(const UniquePtr &other) = delete;
         UniquePtr(UniquePtr &&other) noexcept {
             m_ptr = other.m_ptr;
@@ -40,6 +40,7 @@ class UniquePtr {
             return *this;
         }
         
+        /* The caller is responsible for cleaning up the object (e.g. by use of get_deleter()). */
         T* release() noexcept {
             T* ptrCpy = m_ptr;
             m_ptr = nullptr;
