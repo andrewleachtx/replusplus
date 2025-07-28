@@ -4,7 +4,7 @@ remaking various components of the standard library and maybe other stuff (ie li
 Using cppreference heavily, and the headers contain src code
 
 # todo
-- [ ] unique_ptr
+- [x] unique_ptr
 - [ ] shared_ptr
 - [ ] weak_ptr
 - [ ] stack
