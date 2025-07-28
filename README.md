@@ -1,12 +1,12 @@
 # replusplus
-remaking various components of the standard library and maybe other stuff (ie linalg for gfx)
+Reimplementing various components of the C++ STL. Maybe other stuff, e.g. linalg for gfx.
 
-Using cppreference heavily, and the headers contain src code
+Testing with gtest, and using cppreference heavily. Headers are source.
 
-# todo
+# TODO
 - [x] unique_ptr
-- [ ] shared_ptr
-- [ ] weak_ptr
+- [x] shared_ptr
+- [x] weak_ptr
 - [ ] stack
 - [ ] vector
 - [ ] list
@@ -23,5 +23,3 @@ Using cppreference heavily, and the headers contain src code
 - [ ] string_view
 - [ ] optional
 - [ ] an allocator
-
-# done

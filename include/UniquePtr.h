@@ -1,4 +1,7 @@
 #pragma once
+
+#include <utility>
+
 /*
     https://en.cppreference.com/w/cpp/memory/unique_ptr.html
 
@@ -13,7 +16,7 @@ class UniquePtr {
     public:
         // Constructors
         constexpr UniquePtr() noexcept : m_ptr(nullptr) {}
-        explicit UniquePtr(T *ptr) noexcept : m_ptr(nullptr) {}
+        explicit UniquePtr([[maybe_unused]] T *ptr) noexcept : m_ptr(nullptr) {}
         UniquePtr(const UniquePtr &other) = delete;
         UniquePtr(UniquePtr &&other) noexcept {
             m_ptr = other.m_ptr;

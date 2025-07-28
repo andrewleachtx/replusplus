@@ -3,6 +3,8 @@ project(replusplus LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_compile_options(-Wall -Wextra -Werror)
+
 # Locate ccache
 find_program(CCACHE_PROG ccache)
 if(CCACHE_PROG)
