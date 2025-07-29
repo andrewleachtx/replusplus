@@ -39,6 +39,16 @@ class SharedPtr {
 
             return *this;
         }
+        SharedPtr &operator=(SharedPtr &&other) noexcept {
+            if (this != &other) {
+                release();
+
+                m_ctrlBlk = other.m_ctrlBlk;
+                other.m_ctrlBlk = nullptr;
+            }
+
+            return *this;
+        }
 
         ~SharedPtr() {
             release();
@@ -47,8 +57,15 @@ class SharedPtr {
         void reset() noexcept {
             release();
         }
+        void reset(T *ptr) {
+            release();
 
-        void swap (SharedPtr &other) noexcept {
+            if (ptr) {
+                m_ctrlBlk = new ControlBlock(ptr);
+            }
+        }
+
+        void swap(SharedPtr &other) noexcept {
             std::swap(m_ctrlBlk, other.m_ctrlBlk);
         }
 

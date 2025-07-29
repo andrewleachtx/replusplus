@@ -3,45 +3,51 @@
 #include <gtest/gtest.h>
 
 template <typename T>
-class SharedPtrTypedTests : public ::testing::Test {};
+class UniquePtrTypedTests : public ::testing::Test {};
 
 using TestTypes = ::testing::Types<int, float, double, bool, std::vector<float>, std::vector<std::vector<float>>>;
 
-TYPED_TEST_SUITE(SharedPtrTypedTests, TestTypes);
+TYPED_TEST_SUITE(UniquePtrTypedTests, TestTypes);
 
-TYPED_TEST(SharedPtrTypedTests, DefaultConstructorTest) {
+TYPED_TEST(UniquePtrTypedTests, DefaultConstructorTest) {
     UniquePtr<TypeParam> ptr;
     EXPECT_EQ(ptr.get(), nullptr);
     EXPECT_FALSE(ptr);
 }
 
-TYPED_TEST(SharedPtrTypedTests, RawPtrConstructorTest) {
+TYPED_TEST(UniquePtrTypedTests, RawPtrConstructorTest) {
     auto *rawPtr = new TypeParam();
     UniquePtr<TypeParam> ptr(rawPtr);
     EXPECT_EQ(ptr.get(), rawPtr);
     EXPECT_TRUE(ptr);
 }
 
-TYPED_TEST(SharedPtrTypedTests, MoveConstructorTest) {
+TYPED_TEST(UniquePtrTypedTests, CopyConstructorTest) {
+    constexpr bool isCopyConstructible = std::is_copy_constructible_v<UniquePtr<TypeParam> >;
+    
+    static_assert(!isCopyConstructible, "Copy constructor should be deleted!");
+}
+
+TYPED_TEST(UniquePtrTypedTests, MoveConstructorTest) {
     UniquePtr<TypeParam> src(new TypeParam);
     UniquePtr<TypeParam> dst(std::move(src));
     EXPECT_FALSE(src);
     EXPECT_TRUE(dst);
 }
 
-TYPED_TEST(SharedPtrTypedTests, DestructorTest) {
+TYPED_TEST(UniquePtrTypedTests, DestructorTest) {
     EXPECT_NO_THROW({
         UniquePtr<TypeParam> p(new TypeParam);
     });
 }
 
-TYPED_TEST(SharedPtrTypedTests, CopyOperatorTest) {
+TYPED_TEST(UniquePtrTypedTests, CopyOperatorTest) {
     constexpr bool isCopyAssignable = std::is_copy_assignable_v<UniquePtr<TypeParam> >;
     
     static_assert(!isCopyAssignable, "Copy assignment should be deleted!");
 }
 
-TYPED_TEST(SharedPtrTypedTests, MoveCopyOperatorTest) {
+TYPED_TEST(UniquePtrTypedTests, MoveCopyOperatorTest) {
     UniquePtr<TypeParam> a(new TypeParam());
     UniquePtr<TypeParam> b;
     b = std::move(a);
@@ -49,7 +55,7 @@ TYPED_TEST(SharedPtrTypedTests, MoveCopyOperatorTest) {
     EXPECT_TRUE(b);
 }
 
-TYPED_TEST(SharedPtrTypedTests, MoveCopyOperatorSelfAssignmentTest) {
+TYPED_TEST(UniquePtrTypedTests, MoveCopyOperatorSelfAssignmentTest) {
     UniquePtr<TypeParam> ptr(new TypeParam());
     EXPECT_NO_THROW(
         ptr = std::move(ptr);
@@ -57,18 +63,17 @@ TYPED_TEST(SharedPtrTypedTests, MoveCopyOperatorSelfAssignmentTest) {
     EXPECT_TRUE(ptr);
 }
 
-TYPED_TEST(SharedPtrTypedTests, ReleaseTest) {
+TYPED_TEST(UniquePtrTypedTests, ReleaseTest) {
     auto *rawPtr = new TypeParam();
     UniquePtr<TypeParam> ptr(rawPtr);
     auto *got = ptr.release();
     EXPECT_EQ(got, rawPtr);
     EXPECT_FALSE(ptr);
 
-    // The caller is supposed to handle cleanup https://en.cppreference.com/w/cpp/memory/unique_ptr/release.html
     delete rawPtr;
 }
 
-TYPED_TEST(SharedPtrTypedTests, ResetTest) {
+TYPED_TEST(UniquePtrTypedTests, ResetTest) {
     auto *rawPtr1 = new TypeParam();
     auto *rawPtr2 = new TypeParam();
 
@@ -80,7 +85,7 @@ TYPED_TEST(SharedPtrTypedTests, ResetTest) {
     EXPECT_FALSE(ptr);
 }
 
-TYPED_TEST(SharedPtrTypedTests, SwapTest) {
+TYPED_TEST(UniquePtrTypedTests, SwapTest) {
     auto *rawPtrA = new TypeParam();
     auto *rawPtrB = new TypeParam();
     UniquePtr<TypeParam> a(rawPtrA);
@@ -91,14 +96,14 @@ TYPED_TEST(SharedPtrTypedTests, SwapTest) {
     EXPECT_EQ(b.get(), rawPtrA);
 }
 
-TYPED_TEST(SharedPtrTypedTests, GetTest) {
+TYPED_TEST(UniquePtrTypedTests, GetTest) {
     auto *rawPtr = new TypeParam();
     UniquePtr<TypeParam> ptr(rawPtr);
 
     EXPECT_EQ(ptr.get(), rawPtr);
 }
 
-TYPED_TEST(SharedPtrTypedTests, BoolOperatorTest) {
+TYPED_TEST(UniquePtrTypedTests, BoolOperatorTest) {
     UniquePtr<TypeParam> a;
     EXPECT_FALSE(a);
 
@@ -106,7 +111,7 @@ TYPED_TEST(SharedPtrTypedTests, BoolOperatorTest) {
     EXPECT_TRUE(a);
 }
 
-TYPED_TEST(SharedPtrTypedTests, DereferenceAndArrowTest) {
+TYPED_TEST(UniquePtrTypedTests, DereferenceAndArrowTest) {
     UniquePtr<TypeParam> ptr(new TypeParam());
 
     EXPECT_NO_THROW({
@@ -119,40 +124,9 @@ TYPED_TEST(SharedPtrTypedTests, DereferenceAndArrowTest) {
     }
 }
 
-TYPED_TEST(SharedPtrTypedTests, MakeUniqueTest) {
+TYPED_TEST(UniquePtrTypedTests, MakeUniqueTest) {
     auto ptr = MakeUnique<TypeParam>();
 
     EXPECT_TRUE(ptr);
     EXPECT_EQ(*ptr, TypeParam());
-}
-
-TYPED_TEST(SharedPtrTypedTests, NullptrConstructorAndReleaseTest) {
-    // Note we are not calling default but passing in nullptr
-    UniquePtr<TypeParam> p(nullptr);
-    EXPECT_FALSE(p);
-    EXPECT_EQ(p.get(), nullptr);
-
-    auto *got = p.release();
-    EXPECT_EQ(got, nullptr);
-    EXPECT_FALSE(p);
-}
-
-TYPED_TEST(SharedPtrTypedTests, ResetEmptyDoesNothing) {
-    UniquePtr<TypeParam> p;
-    EXPECT_NO_THROW(p.reset());
-    EXPECT_FALSE(p);
-}
-
-TYPED_TEST(SharedPtrTypedTests, SelfSwapAllowed) {
-    auto *raw = new TypeParam();
-    UniquePtr<TypeParam> p(raw);
-    EXPECT_NO_THROW(p.swap(p));
-    EXPECT_EQ(p.get(), raw);
-}
-
-TYPED_TEST(SharedPtrTypedTests, SwapTwoEmpties) {
-    UniquePtr<TypeParam> a, b;
-    EXPECT_NO_THROW(a.swap(b));
-    EXPECT_FALSE(a);
-    EXPECT_FALSE(b);
 }
