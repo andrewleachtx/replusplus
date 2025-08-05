@@ -6,7 +6,7 @@ Testing with gtest, and using cppreference heavily. Headers are source.
 # TODO
 - [x] unique_ptr
 - [x] shared_ptr
-- [x] weak_ptr
+- [] weak_ptr
 - [ ] stack
 - [ ] vector
 - [ ] list

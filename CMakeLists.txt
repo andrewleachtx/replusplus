@@ -18,6 +18,8 @@ add_library(replusplus INTERFACE)
 target_include_directories(replusplus INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(vendor/googletest)
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable benchmark tests")
+add_subdirectory(vendor/benchmark)
 enable_testing()
 
 add_executable(runTests tests/UniquePtr.cpp tests/WeakPtr.cpp tests/SharedPtr.cpp)

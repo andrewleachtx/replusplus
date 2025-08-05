@@ -188,3 +188,4 @@ TYPED_TEST(SharedPtrTypedTests, SwapTwoEmpties) {
     EXPECT_FALSE(a);
     EXPECT_FALSE(b);
 }
+
