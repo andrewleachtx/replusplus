@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(replusplus LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_compile_options(-Wall -Wextra -Werror)
 
@@ -22,7 +23,12 @@ set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable benchmark tests")
 add_subdirectory(vendor/benchmark)
 enable_testing()
 
-add_executable(runTests tests/UniquePtr.cpp tests/WeakPtr.cpp tests/SharedPtr.cpp)
+add_executable(runTests
+    tests/UniquePtr.cpp 
+    tests/WeakPtr.cpp
+    tests/SharedPtr.cpp
+    tests/Vector.cpp
+)
 target_link_libraries(runTests PRIVATE replusplus gtest_main)
 target_include_directories(runTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(runTests PRIVATE -fsanitize=address,leak,undefined -fno-omit-frame-pointer)

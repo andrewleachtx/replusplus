@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include <atomic>
 
 template <typename T>
@@ -105,7 +104,6 @@ class SharedPtr {
         explicit SharedPtr(ControlBlock<T> *ctrlBlk) noexcept : m_ctrlBlk(ctrlBlk) {
             // TODO:
         }
-        friend class WeakPtr<T>;
 
         // Called from destructor
         void release() {

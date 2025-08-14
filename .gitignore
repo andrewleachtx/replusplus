@@ -16,3 +16,8 @@ Temporary/
 .vscode/
 
 *~
+
+exclude/
+
+.cache/
+compile_commands.json
