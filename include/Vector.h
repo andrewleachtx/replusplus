@@ -175,7 +175,33 @@ public:
     constexpr void reserve(size_type new_cap) { /* TODO */ }
     constexpr size_type capacity() const noexcept { /* TODO */ }
     constexpr void shrink_to_fit() { /* TODO */ }
+
+    constexpr void clear() noexcept { /* TODO */ }
     
+    constexpr iterator insert(const_iterator pos, const value_type &value) { /* TODO */ }
+    constexpr iterator insert(const_iterator pos, value_type &&value) { /* TODO */ }
+    
+    template<typename... Args>
+    constexpr iterator emplace(const_iterator, Args&&... args) { /* TODO */ }
+    
+    constexpr iterator erase(iterator pos) { /* TODO */ }
+    constexpr iterator erase(iterator first, iterator last) { /* TODO */ }
+    
+    constexpr void push_back(const T &value) { /* TODO */ }
+    constexpr void push_back(T &&value) { /* TODO */ }
+    
+    template<typename... Args>
+    constexpr void emplace_back(Args&&... args) { /* TODO */ }
+    template<typename... Args>
+    constexpr reference emplace_back(Args&&... args) { /* TODO */ }
+
+    constexpr void pop_back() { /* TODO */ }
+
+    constexpr void resize(size_type count) { /* TODO */ }
+    constexpr void resize(size_type count, const value_type &value) { /* TODO */ }
+
+    constexpr void swap(Vector &other) noexcept { /* TODO */ }
+
     private:
         pointer m_data;
         size_type m_size;
