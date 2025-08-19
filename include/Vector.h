@@ -2,9 +2,8 @@
 
 const size_t GROWTH_FACTOR = 2UL;
 
-template<typename T, typename Allocator = std::allocator<T>>
-class Vector {
-public:
+template<typename T, typename Allocator = std::allocator<T>> class Vector {
+  public:
     struct Iterator {
         using iterator_category = std::random_access_iterator_tag;
         using value_type = T;
@@ -14,14 +13,10 @@ public:
 
         Iterator() = default;
         explicit Iterator(pointer ptr) : m_ptr(ptr) {}
-        Iterator &operator=(const Iterator&) noexcept = default;
+        Iterator& operator=(const Iterator&) noexcept = default;
 
-        [[nodiscard]] reference operator*() const {
-            return *m_ptr;
-        }
-        [[nodiscard]] pointer operator->() const {
-            return m_ptr;
-        }
+        [[nodiscard]] reference operator*() const { return *m_ptr; }
+        [[nodiscard]] pointer operator->() const { return m_ptr; }
 
         Iterator& operator++() noexcept {
             ++m_ptr;
@@ -44,10 +39,10 @@ public:
 
         [[nodiscard]] Iterator operator+(difference_type n) const { return Iterator(m_ptr + n); }
         [[nodiscard]] Iterator operator-(difference_type n) const { return Iterator(m_ptr - n); }
-        difference_type operator-(const Iterator &rhs) { return m_ptr - rhs.m_ptr; }
-        
+        difference_type operator-(const Iterator& rhs) { return m_ptr - rhs.m_ptr; }
+
         // TODO: Learn how to define three way comparison operator manually
-        auto operator<=>(const Iterator &rhs) const = default;
+        auto operator<=>(const Iterator& rhs) const = default;
 
         pointer m_ptr = nullptr;
     };
@@ -62,164 +57,193 @@ public:
     using const_pointer = std::allocator_traits<Allocator>::const_pointer;
     using iterator = Iterator;
     using const_iterator = const Iterator;
-    
+
     using traits = std::allocator_traits<allocator_type>;
-    
+
     Vector() = default;
-    explicit Vector(size_type count, const allocator_type &alloc = allocator_type()) : m_data(nullptr) , m_size(count), m_capacity(count), m_alloc(alloc) {
+    explicit Vector(size_type count, const allocator_type& alloc = allocator_type())
+        : m_data(nullptr), m_size(count), m_capacity(count), m_alloc(alloc) {
         m_data = traits::allocate(alloc, count);
-        
+
         for (size_type i = 0; i < count; i++) {
             std::allocator<allocator_type>::construct(m_alloc, m_data + i, value_type());
         }
     }
-    constexpr Vector(size_type count, const_reference value = value_type(), const allocator_type &alloc = allocator_type()) : m_data(nullptr), m_size(count), m_capacity(count), m_alloc(alloc) {
+    constexpr Vector(size_type count, const_reference value = value_type(),
+                     const allocator_type& alloc = allocator_type())
+        : m_data(nullptr), m_size(count), m_capacity(count), m_alloc(alloc) {
         m_data = traits::allocate(m_alloc, count);
-        
+
         for (size_type i = 0; i < count; i++) {
             std::allocator<allocator_type>::construct(m_alloc, m_data + i, value);
         }
     }
-    constexpr Vector(const Vector &other)
-    : m_data(nullptr),
-    m_size(other.m_size),
-    m_capacity(other.m_capacity),
-    m_alloc(traits::select_on_container_copy_construction(other.m_alloc)) {
-        
+    constexpr Vector(const Vector& other)
+        : m_data(nullptr),
+          m_size(other.m_size),
+          m_capacity(other.m_capacity),
+          m_alloc(traits::select_on_container_copy_construction(other.m_alloc)) {
         m_data = traits::allocate(m_alloc, m_capacity);
-        
+
         for (size_type i = 0; i < m_size; i++) {
             traits::construct(m_alloc, m_data + i, other.m_data[i]);
         }
     }
-    constexpr Vector(Vector &&other) noexcept
-    : m_data(other.m_data),
-    m_size(other.m_size),
-    m_capacity(other.m_capacity),
-    m_alloc(std::move(other.m_alloc)) {
-        
+    constexpr Vector(Vector&& other) noexcept
+        : m_data(other.m_data), m_size(other.m_size), m_capacity(other.m_capacity), m_alloc(std::move(other.m_alloc)) {
         other.m_data = nullptr;
         other.m_size = 0;
         other.m_capacity = 0;
-        other.m_alloc = allocator_type {};
+        other.m_alloc = allocator_type{};
     }
-    
+
     ~Vector() {
         for (size_type i = 0; i < m_size; i++) {
             traits::destroy(m_alloc, m_data + i);
         }
-        
+
         if (m_data) {
             traits::deallocate(m_alloc, m_data, m_capacity);
         }
     }
-    
-    constexpr Vector& operator=(const Vector &other) {
+
+    constexpr Vector& operator=(const Vector& other) {
         if (this != &other) {
             // Assume we need to destroy all of our values even if we don't
             for (size_type i = 0; i < m_size; i++) {
                 traits::destroy(m_alloc, m_data + i);
             }
-            
+
             // TODO: Possibly check for difference in capacity to avoid unnecessary alloc/dealloc
             traits::deallocate(m_alloc, m_data, m_capacity);
-            
+
             if constexpr (traits::propagate_on_container_copy_assignment::value) {
-                
             }
             m_alloc = traits::select_on_container_copy_construction(other.m_alloc);
             m_size = other.m_size;
             m_capacity = other.m_capacity;
-            
-            m_data = traits::allocate(m_alloc, m_capacity);            
+
+            m_data = traits::allocate(m_alloc, m_capacity);
             for (size_type i = 0; i < m_size; i++) {
                 traits::construct(m_alloc, m_data + i, other.m_data[i]);
             }
         }
-        
+
         return *this;
     }
-    Vector& operator=(Vector &&other) noexcept {
+    Vector& operator=(Vector&& other) noexcept {
         if (this != &other) {
             m_data = other.m_data;
             m_size = other.m_size;
             m_capacity = other.m_capacity;
             m_alloc = std::move(other.m_alloc);
-            
+
             other.m_data = nullptr;
             other.m_size = 0;
             other.m_capacity = 0;
-            other.m_alloc = allocator_type {};
+            other.m_alloc = allocator_type{};
         }
-        
+
         return *this;
     }
-    Vector& operator=(std::initializer_list<value_type> ilist) { /* TODO */ }
+    Vector& operator=(std::initializer_list<value_type> ilist) { /* TODO */
+    }
 
-    constexpr void assign(size_type count, const_reference value) { /* TODO */ }
-    constexpr void assign(std::initializer_list<value_type> ilist) { /* TODO */ }
-    
-    constexpr allocator_type get_allocator() const { /* TODO */ }
+    constexpr void assign(size_type count, const_reference value) { /* TODO */
+    }
+    constexpr void assign(std::initializer_list<value_type> ilist) { /* TODO */
+    }
 
-    constexpr reference at(size_type pos) { /* TODO */ }
-    constexpr const_reference at(size_type pos) const { /* TODO */ }
+    constexpr allocator_type get_allocator() const { /* TODO */
+    }
 
-    constexpr reference operator[](size_type pos) { /* TODO */ }
-    constexpr const_reference operator[](size_type pos) const { /* TODO */ }
+    constexpr reference at(size_type pos) { /* TODO */
+    }
+    constexpr const_reference at(size_type pos) const { /* TODO */
+    }
 
-    constexpr reference front() { /* TODO */ }
-    constexpr const_reference front() const { /* TODO */ }
+    constexpr reference operator[](size_type pos) { /* TODO */
+    }
+    constexpr const_reference operator[](size_type pos) const { /* TODO */
+    }
 
-    constexpr reference back() { /* TODO */ }
-    constexpr const_reference back() const { /* TODO */ }
+    constexpr reference front() { /* TODO */
+    }
+    constexpr const_reference front() const { /* TODO */
+    }
+
+    constexpr reference back() { /* TODO */
+    }
+    constexpr const_reference back() const { /* TODO */
+    }
 
     constexpr pointer data() noexcept { return m_data; }
     constexpr const_pointer data() const noexcept { return m_data; }
 
-    constexpr iterator begin() noexcept { /* TODO */ }
-    constexpr const_iterator begin() const noexcept { /* TODO */ }
-    constexpr const_iterator cbegin() const noexcept { /* TODO */ }
-    
-    constexpr iterator end() noexcept { /* TODO */ }
-    constexpr const_iterator end() const noexcept { /* TODO */ }
-    constexpr const_iterator cend() const noexcept { /* TODO */ }
+    constexpr iterator begin() noexcept { /* TODO */
+    }
+    constexpr const_iterator begin() const noexcept { /* TODO */
+    }
+    constexpr const_iterator cbegin() const noexcept { /* TODO */
+    }
+
+    constexpr iterator end() noexcept { /* TODO */
+    }
+    constexpr const_iterator end() const noexcept { /* TODO */
+    }
+    constexpr const_iterator cend() const noexcept { /* TODO */
+    }
 
     constexpr bool empty() const noexcept { return m_size == 0; }
     constexpr size_type size() const noexcept { return m_size; }
-    constexpr size_type max_size() const noexcept { /* TODO */ }
-    constexpr void reserve(size_type new_cap) { /* TODO */ }
+    constexpr size_type max_size() const noexcept { /* TODO */
+    }
+    constexpr void reserve(size_type new_cap) { /* TODO */
+    }
     constexpr size_type capacity() const noexcept { return m_capacity; }
-    constexpr void shrink_to_fit() { /* TODO */ }
+    constexpr void shrink_to_fit() { /* TODO */
+    }
 
-    constexpr void clear() noexcept { /* TODO */ }
-    
-    constexpr iterator insert(const_iterator pos, const value_type &value) { /* TODO */ }
-    constexpr iterator insert(const_iterator pos, value_type &&value) { /* TODO */ }
-    
-    template<typename... Args>
-    constexpr iterator emplace(const_iterator, Args&&... args) { /* TODO */ }
-    
-    constexpr iterator erase(iterator pos) { /* TODO */ }
-    constexpr iterator erase(iterator first, iterator last) { /* TODO */ }
-    
-    constexpr void push_back(const T &value) { /* TODO */ }
-    constexpr void push_back(T &&value) { /* TODO */ }
-    
-    template<typename... Args>
-    constexpr void emplace_back(Args&&... args) { /* TODO */ }
-    template<typename... Args>
-    constexpr reference emplace_back(Args&&... args) { /* TODO */ }
+    constexpr void clear() noexcept { /* TODO */
+    }
 
-    constexpr void pop_back() { /* TODO */ }
+    constexpr iterator insert(const_iterator pos, const value_type& value) { /* TODO */
+    }
+    constexpr iterator insert(const_iterator pos, value_type&& value) { /* TODO */
+    }
 
-    constexpr void resize(size_type count) { /* TODO */ }
-    constexpr void resize(size_type count, const value_type &value) { /* TODO */ }
+    template<typename... Args> constexpr iterator emplace(const_iterator, Args&&... args) { /* TODO */
+    }
 
-    constexpr void swap(Vector &other) noexcept { /* TODO */ }
+    constexpr iterator erase(iterator pos) { /* TODO */
+    }
+    constexpr iterator erase(iterator first, iterator last) { /* TODO */
+    }
 
-    private:
-        pointer m_data;
-        size_type m_size;
-        size_type m_capacity;
-        [[no_unique_address]] allocator_type m_alloc;
+    constexpr void push_back(const T& value) { /* TODO */
+    }
+    constexpr void push_back(T&& value) { /* TODO */
+    }
+
+    template<typename... Args> constexpr void emplace_back(Args&&... args) { /* TODO */
+    }
+    template<typename... Args> constexpr reference emplace_back(Args&&... args) { /* TODO */
+    }
+
+    constexpr void pop_back() { /* TODO */
+    }
+
+    constexpr void resize(size_type count) { /* TODO */
+    }
+    constexpr void resize(size_type count, const value_type& value) { /* TODO */
+    }
+
+    constexpr void swap(Vector& other) noexcept { /* TODO */
+    }
+
+  private:
+    pointer m_data;
+    size_type m_size;
+    size_type m_capacity;
+    [[no_unique_address]] allocator_type m_alloc;
 };
