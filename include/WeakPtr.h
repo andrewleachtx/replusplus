@@ -10,8 +10,8 @@ template <typename T>
 class WeakPtr {
     public:
         constexpr WeakPtr() noexcept {}
-        WeakPtr(const &WeakPtr other) noexcept {}
-        WeakPtr(const &SharedPtr other) noexcept {}
+        WeakPtr(const WeakPtr &other) noexcept {}
+        WeakPtr(const SharedPtr<T> &other) noexcept {}
         SharedPtr<T> lock() const noexcept {
             return SharedPtr<T>(m_ctrlBlk);
         }

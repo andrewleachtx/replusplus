@@ -4,8 +4,8 @@
 template <typename T>
 struct ControlBlock {
     T* ptr;
-    std::atomic<size_t> strongCt;
-    std::atomic<size_t> weakCt;
+    std::atomic<std::size_t> strongCt;
+    std::atomic<std::size_t> weakCt;
 
     ControlBlock() : ptr(nullptr), strongCt(0), weakCt(0) {}
     ControlBlock(T *p) : ptr(p), strongCt(1), weakCt(1) {}
@@ -19,6 +19,7 @@ template <typename T>
 class SharedPtr {
     public:
         constexpr SharedPtr() noexcept : m_ctrlBlk(nullptr) {}
+        constexpr SharedPtr(std::nullptr_t) noexcept : m_ctrlBlk(nullptr) {}
         explicit SharedPtr(T *rawPtr) noexcept : m_ctrlBlk(new ControlBlock(rawPtr)) {}
         SharedPtr(const SharedPtr &other) noexcept {
             m_ctrlBlk = other.m_ctrlBlk;
@@ -83,7 +84,7 @@ class SharedPtr {
             return get();
         }
 
-        size_t use_count() const noexcept {
+        std::size_t use_count() const noexcept {
             if (!m_ctrlBlk) {
                 return 0;
             }

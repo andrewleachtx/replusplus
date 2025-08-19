@@ -18,6 +18,7 @@ endif()
 add_library(replusplus INTERFACE)
 target_include_directories(replusplus INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# TODO: Fix "-- Failed to find LLVM FileCheck"
 add_subdirectory(vendor/googletest)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable benchmark tests")
 add_subdirectory(vendor/benchmark)

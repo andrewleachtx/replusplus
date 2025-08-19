@@ -1,4 +1,5 @@
 #include "WeakPtr.h"
+#include "SharedPtr.h"
 
 #include <gtest/gtest.h>
 

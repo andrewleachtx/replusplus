@@ -3,6 +3,18 @@ Reimplementing various components of the C++ STL. Maybe other stuff, e.g. linalg
 
 Testing with gtest, and using cppreference heavily. Headers are source.
 
+# Building & Running Tests
+Build
+```sh
+cmake -S . -B build
+cmake --build build -j
+```
+
+Run
+```sh
+
+```
+
 # TODO
 - [x] unique_ptr
 - [x] shared_ptr
