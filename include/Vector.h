@@ -23,16 +23,31 @@ public:
             return m_ptr;
         }
 
-        Iterator& operator++() const { /* TODO */ }
-        Iterator operator++(int) { /* TODO */ }
-        Iterator& operator--() const { /* TODO */ }
-        Iterator operator--(int) { /* TODO */ }
+        Iterator& operator++() noexcept {
+            ++m_ptr;
+            return *this;
+        }
+        Iterator operator++(int) noexcept {
+            Iterator cpy = *this;
+            m_ptr++;
+            return cpy;
+        }
+        Iterator& operator--() noexcept {
+            --m_ptr;
+            return *this;
+        }
+        Iterator operator--(int) noexcept {
+            Iterator cpy = *this;
+            m_ptr--;
+            return cpy;
+        }
 
-        [[nodiscard]] Iterator operator+(difference_type n) const { /* TODO */ }
-        [[nodiscard]] Iterator operator-(difference_type n) const { /* TODO */ }
-        difference_type operator-(const Iterator &rhs) { /* TODO */ }
+        [[nodiscard]] Iterator operator+(difference_type n) const { return Iterator(m_ptr + n); }
+        [[nodiscard]] Iterator operator-(difference_type n) const { return Iterator(m_ptr - n); }
+        difference_type operator-(const Iterator &rhs) { return m_ptr - rhs.m_ptr; }
         
-        auto operator<=>(const Iterator &rhs) const = default; // TODO If you want
+        // TODO: Learn how to define three way comparison operator manually
+        auto operator<=>(const Iterator &rhs) const = default;
 
         pointer m_ptr = nullptr;
     };
@@ -58,7 +73,7 @@ public:
             std::allocator<allocator_type>::construct(m_alloc, m_data + i, value_type());
         }
     }
-    constexpr Vector(size_type count, const_reference value = value_type(), const allocator_type &alloc = allocator_type()) {
+    constexpr Vector(size_type count, const_reference value = value_type(), const allocator_type &alloc = allocator_type()) : m_data(nullptr), m_size(count), m_capacity(count), m_alloc(alloc) {
         m_data = traits::allocate(m_alloc, count);
         
         for (size_type i = 0; i < count; i++) {
@@ -158,8 +173,8 @@ public:
     constexpr reference back() { /* TODO */ }
     constexpr const_reference back() const { /* TODO */ }
 
-    constexpr pointer data() noexcept { /* TODO */ }
-    constexpr const_pointer data() const noexcept { /* TODO */ }
+    constexpr pointer data() noexcept { return m_data; }
+    constexpr const_pointer data() const noexcept { return m_data; }
 
     constexpr iterator begin() noexcept { /* TODO */ }
     constexpr const_iterator begin() const noexcept { /* TODO */ }
@@ -169,11 +184,11 @@ public:
     constexpr const_iterator end() const noexcept { /* TODO */ }
     constexpr const_iterator cend() const noexcept { /* TODO */ }
 
-    constexpr bool empty() const noexcept { /* TODO */ }
-    constexpr size_type size() const noexcept { /* TODO */ }
+    constexpr bool empty() const noexcept { return m_size == 0; }
+    constexpr size_type size() const noexcept { return m_size; }
     constexpr size_type max_size() const noexcept { /* TODO */ }
     constexpr void reserve(size_type new_cap) { /* TODO */ }
-    constexpr size_type capacity() const noexcept { /* TODO */ }
+    constexpr size_type capacity() const noexcept { return m_capacity; }
     constexpr void shrink_to_fit() { /* TODO */ }
 
     constexpr void clear() noexcept { /* TODO */ }

@@ -13,28 +13,28 @@ TYPED_TEST_SUITE(VectorTypedTests, TestTypes);
 
 TYPED_TEST(VectorTypedTests, DefaultConstructorTest) {
     Vector<TypeParam> vec;
-    EXPECT_EQ(vec.m_data, nullptr);
-    EXPECT_EQ(vec.m_size, 0);
-    EXPECT_EQ(vec.m_capacity, 0);
+    EXPECT_EQ(vec.data(), nullptr);
+    EXPECT_EQ(vec.size(), 0);
+    EXPECT_EQ(vec.capacity(), 0);
 }
 
 TYPED_TEST(VectorTypedTests, CountConstructorTest) {
     const size_t count = 5;
     Vector<TypeParam> vec(count);
-    EXPECT_NE(vec.m_data, nullptr);
-    EXPECT_EQ(vec.m_size, count);
-    EXPECT_EQ(vec.m_capacity, count);
+    EXPECT_NE(vec.data(), nullptr);
+    EXPECT_EQ(vec.size(), count);
+    EXPECT_EQ(vec.capacity(), count);
     
     for (size_t i = 0; i < count; ++i) {
-        EXPECT_EQ(vec.m_data[i], TypeParam{});
+        EXPECT_EQ(vec.data()[i], TypeParam{});
     }
 }
 
 TYPED_TEST(VectorTypedTests, CountConstructorZeroTest) {
     Vector<TypeParam> vec(0);
-    EXPECT_NE(vec.m_data, nullptr);
-    EXPECT_EQ(vec.m_size, 0);
-    EXPECT_EQ(vec.m_capacity, 0);
+    EXPECT_NE(vec.data(), nullptr);
+    EXPECT_EQ(vec.size(), 0);
+    EXPECT_EQ(vec.capacity(), 0);
 }
 
 TYPED_TEST(VectorTypedTests, CountValueConstructorTest) {
@@ -47,12 +47,12 @@ TYPED_TEST(VectorTypedTests, CountValueConstructorTest) {
     }
     
     Vector<TypeParam> vec(count, value);
-    EXPECT_NE(vec.m_data, nullptr);
-    EXPECT_EQ(vec.m_size, count);
-    EXPECT_EQ(vec.m_capacity, count);
+    EXPECT_NE(vec.data(), nullptr);
+    EXPECT_EQ(vec.size(), count);
+    EXPECT_EQ(vec.capacity(), count);
     
     for (size_t i = 0; i < count; ++i) {
-        EXPECT_EQ(vec.m_data[i], value);
+        EXPECT_EQ(vec.data()[i], value);
     }
 }
 
@@ -137,13 +137,13 @@ TYPED_TEST(VectorTypedTests, CopyAssignmentTest) {
 TYPED_TEST(VectorTypedTests, CopyAssignmentSelfTest) {
     const size_t count = 3;
     Vector<TypeParam> vec(count);
-    auto original_data = vec.m_data;
+    auto original_data = vec.data();
     
     vec = vec;
     
-    EXPECT_EQ(vec.m_data, original_data);
-    EXPECT_EQ(vec.m_size, count);
-    EXPECT_EQ(vec.m_capacity, count);
+    EXPECT_EQ(vec.data(), original_data);
+    EXPECT_EQ(vec.size(), count);
+    EXPECT_EQ(vec.capacity(), count);
 }
 
 TYPED_TEST(VectorTypedTests, CopyAssignmentEmptyToNonEmptyTest) {
@@ -181,13 +181,13 @@ TYPED_TEST(VectorTypedTests, MoveAssignmentTest) {
 TYPED_TEST(VectorTypedTests, MoveAssignmentSelfTest) {
     const size_t count = 3;
     Vector<TypeParam> vec(count);
-    auto original_data = vec.m_data;
+    auto original_data = vec.data();
     
     vec = std::move(vec);
     
-    EXPECT_EQ(vec.m_data, original_data);
-    EXPECT_EQ(vec.m_size, count);
-    EXPECT_EQ(vec.m_capacity, count);
+    EXPECT_EQ(vec.data(), original_data);
+    EXPECT_EQ(vec.size(), count);
+    EXPECT_EQ(vec.capacity(), count);
 }
 
 struct ThrowingType {
@@ -232,18 +232,18 @@ TEST_F(VectorSpecificTests, AllocatorTest) {
     std::allocator<int> alloc;
     Vector<int, std::allocator<int>> vec(5, alloc);
     
-    EXPECT_EQ(vec.m_size, 5);
-    EXPECT_EQ(vec.m_capacity, 5);
+    EXPECT_EQ(vec.size(), 5);
+    EXPECT_EQ(vec.capacity(), 5);
 }
 
 TEST_F(VectorSpecificTests, CustomAllocatorTest) {
     std::allocator<std::string> alloc;
     Vector<std::string, std::allocator<std::string>> vec(3, std::string("test"), alloc);
     
-    EXPECT_EQ(vec.m_size, 3);
-    EXPECT_EQ(vec.m_capacity, 3);
+    EXPECT_EQ(vec.size(), 3);
+    EXPECT_EQ(vec.capacity(), 3);
     for (size_t i = 0; i < 3; ++i) {
-        EXPECT_EQ(vec.m_data[i], "test");
+        EXPECT_EQ(vec.data()[i], "test");
     }
 }
 
@@ -251,9 +251,9 @@ TEST_F(VectorSpecificTests, LargeVectorTest) {
     const size_t large_size = 10000;
     Vector<int> vec(large_size);
     
-    EXPECT_EQ(vec.m_size, large_size);
-    EXPECT_EQ(vec.m_capacity, large_size);
-    EXPECT_NE(vec.m_data, nullptr);
+    EXPECT_EQ(vec.size(), large_size);
+    EXPECT_EQ(vec.capacity(), large_size);
+    EXPECT_NE(vec.data(), nullptr);
 }
 
 TEST_F(VectorSpecificTests, ComplexTypeTest) {
@@ -270,37 +270,37 @@ TEST_F(VectorSpecificTests, ComplexTypeTest) {
     };
     
     Vector<ComplexType> vec(3);
-    EXPECT_EQ(vec.m_size, 3);
+    EXPECT_EQ(vec.size(), 3);
     
     for (size_t i = 0; i < 3; ++i) {
-        EXPECT_EQ(vec.m_data[i].value, 0);
-        EXPECT_EQ(vec.m_data[i].name, "default");
+        EXPECT_EQ(vec.data()[i].value, 0);
+        EXPECT_EQ(vec.data()[i].name, "default");
     }
 }
 
 TEST_F(VectorSpecificTests, IteratorBasicTest) {
     Vector<int> vec(5);
     
-    Vector<int>::Iterator it(vec.m_data);
+    Vector<int>::Iterator it(vec.data());
     Vector<int>::Iterator default_it;
     
-    EXPECT_EQ(it.m_ptr, vec.m_data);
+    EXPECT_EQ(it.m_ptr, vec.data());
     EXPECT_EQ(default_it.m_ptr, nullptr);
 }
 
 TEST_F(VectorSpecificTests, IteratorDereferenceTest) {
     Vector<int> vec(1);
-    vec.m_data[0] = 42;
+    vec.data()[0] = 42;
     
-    Vector<int>::Iterator it(vec.m_data);
+    Vector<int>::Iterator it(vec.data());
     EXPECT_EQ(*it, 42);
-    EXPECT_EQ(it.operator->(), vec.m_data);
+    EXPECT_EQ(it.operator->(), vec.data());
 }
 
 TEST_F(VectorSpecificTests, IteratorAssignmentTest) {
     Vector<int> vec(2);
     
-    Vector<int>::Iterator it1(vec.m_data);
+    Vector<int>::Iterator it1(vec.data());
     Vector<int>::Iterator it2;
     
     it2 = it1;
@@ -310,7 +310,7 @@ TEST_F(VectorSpecificTests, IteratorAssignmentTest) {
 TEST_F(VectorSpecificTests, ElementAccessAtTest) {
     Vector<int> vec(5);
     for (size_t i = 0; i < 5; ++i) {
-        vec.m_data[i] = static_cast<int>(i * 10);
+        vec.data()[i] = static_cast<int>(i * 10);
     }
     
     for (size_t i = 0; i < 5; ++i) {
@@ -336,7 +336,7 @@ TEST_F(VectorSpecificTests, ElementAccessAtOutOfBoundsTest) {
 TEST_F(VectorSpecificTests, ElementAccessBracketOperatorTest) {
     Vector<int> vec(5);
     for (size_t i = 0; i < 5; ++i) {
-        vec.m_data[i] = static_cast<int>(i * 10);
+        vec.data()[i] = static_cast<int>(i * 10);
     }
     
     for (size_t i = 0; i < 5; ++i) {
@@ -354,9 +354,9 @@ TEST_F(VectorSpecificTests, ElementAccessBracketOperatorTest) {
 
 TEST_F(VectorSpecificTests, ElementAccessFrontTest) {
     Vector<int> vec(3);
-    vec.m_data[0] = 42;
-    vec.m_data[1] = 100;
-    vec.m_data[2] = 200;
+    vec.data()[0] = 42;
+    vec.data()[1] = 100;
+    vec.data()[2] = 200;
     
     EXPECT_EQ(vec.front(), 42);
     
@@ -369,9 +369,9 @@ TEST_F(VectorSpecificTests, ElementAccessFrontTest) {
 
 TEST_F(VectorSpecificTests, ElementAccessBackTest) {
     Vector<int> vec(3);
-    vec.m_data[0] = 42;
-    vec.m_data[1] = 100;
-    vec.m_data[2] = 200;
+    vec.data()[0] = 42;
+    vec.data()[1] = 100;
+    vec.data()[2] = 200;
     
     EXPECT_EQ(vec.back(), 200);
     
@@ -385,10 +385,10 @@ TEST_F(VectorSpecificTests, ElementAccessBackTest) {
 TEST_F(VectorSpecificTests, ElementAccessDataTest) {
     Vector<int> vec(5);
     
-    EXPECT_EQ(vec.data(), vec.m_data);
+    EXPECT_EQ(vec.data(), vec.data());
     
     const Vector<int>& const_vec = vec;
-    EXPECT_EQ(const_vec.data(), vec.m_data);
+    EXPECT_EQ(const_vec.data(), vec.data());
     
     Vector<int> empty_vec;
     EXPECT_EQ(empty_vec.data(), nullptr);
@@ -397,14 +397,14 @@ TEST_F(VectorSpecificTests, ElementAccessDataTest) {
 TEST_F(VectorSpecificTests, IteratorBeginEndTest) {
     Vector<int> vec(5);
     for (size_t i = 0; i < 5; ++i) {
-        vec.m_data[i] = static_cast<int>(i);
+        vec.data()[i] = static_cast<int>(i);
     }
     
     auto it_begin = vec.begin();
     auto it_end = vec.end();
     
-    EXPECT_EQ(it_begin.m_ptr, vec.m_data);
-    EXPECT_EQ(it_end.m_ptr, vec.m_data + 5);
+    EXPECT_EQ(it_begin.m_ptr, vec.data());
+    EXPECT_EQ(it_end.m_ptr, vec.data() + 5);
     
     const Vector<int>& const_vec = vec;
     auto const_it_begin = const_vec.begin();
@@ -412,16 +412,16 @@ TEST_F(VectorSpecificTests, IteratorBeginEndTest) {
     auto cbegin_it = const_vec.cbegin();
     auto cend_it = const_vec.cend();
     
-    EXPECT_EQ(const_it_begin.m_ptr, vec.m_data);
-    EXPECT_EQ(const_it_end.m_ptr, vec.m_data + 5);
-    EXPECT_EQ(cbegin_it.m_ptr, vec.m_data);
-    EXPECT_EQ(cend_it.m_ptr, vec.m_data + 5);
+    EXPECT_EQ(const_it_begin.m_ptr, vec.data());
+    EXPECT_EQ(const_it_end.m_ptr, vec.data() + 5);
+    EXPECT_EQ(cbegin_it.m_ptr, vec.data());
+    EXPECT_EQ(cend_it.m_ptr, vec.data() + 5);
 }
 
 TEST_F(VectorSpecificTests, IteratorIncrementDecrementTest) {
     Vector<int> vec(5);
     for (size_t i = 0; i < 5; ++i) {
-        vec.m_data[i] = static_cast<int>(i * 10);
+        vec.data()[i] = static_cast<int>(i * 10);
     }
     
     auto it = vec.begin();
@@ -445,7 +445,7 @@ TEST_F(VectorSpecificTests, IteratorIncrementDecrementTest) {
 TEST_F(VectorSpecificTests, IteratorArithmeticTest) {
     Vector<int> vec(10);
     for (size_t i = 0; i < 10; ++i) {
-        vec.m_data[i] = static_cast<int>(i);
+        vec.data()[i] = static_cast<int>(i);
     }
     
     auto it = vec.begin();
@@ -539,7 +539,7 @@ TEST_F(VectorSpecificTests, CapacityShrinkToFitTest) {
 TEST_F(VectorSpecificTests, ModifiersClearTest) {
     Vector<int> vec(5);
     for (size_t i = 0; i < 5; ++i) {
-        vec.m_data[i] = static_cast<int>(i);
+        vec.data()[i] = static_cast<int>(i);
     }
     
     vec.clear();
@@ -549,9 +549,9 @@ TEST_F(VectorSpecificTests, ModifiersClearTest) {
 
 TEST_F(VectorSpecificTests, ModifiersInsertTest) {
     Vector<int> vec(3);
-    vec.m_data[0] = 1;
-    vec.m_data[1] = 3;
-    vec.m_data[2] = 5;
+    vec.data()[0] = 1;
+    vec.data()[1] = 3;
+    vec.data()[2] = 5;
     
     auto it = vec.insert(vec.begin() + 1, 2);
     EXPECT_EQ(*it, 2);
@@ -570,8 +570,8 @@ TEST_F(VectorSpecificTests, ModifiersInsertTest) {
 
 TEST_F(VectorSpecificTests, ModifiersEmplaceTest) {
     Vector<std::string> vec(2);
-    vec.m_data[0] = "hello";
-    vec.m_data[1] = "world";
+    vec.data()[0] = "hello";
+    vec.data()[1] = "world";
     
     auto it = vec.emplace(vec.begin() + 1, "beautiful");
     EXPECT_EQ(*it, "beautiful");
@@ -584,7 +584,7 @@ TEST_F(VectorSpecificTests, ModifiersEmplaceTest) {
 TEST_F(VectorSpecificTests, ModifiersEraseTest) {
     Vector<int> vec(5);
     for (size_t i = 0; i < 5; ++i) {
-        vec.m_data[i] = static_cast<int>(i);
+        vec.data()[i] = static_cast<int>(i);
     }
     
     auto it = vec.erase(vec.begin() + 2);
@@ -630,9 +630,9 @@ TEST_F(VectorSpecificTests, ModifiersEmplaceBackTest) {
 
 TEST_F(VectorSpecificTests, ModifiersPopBackTest) {
     Vector<int> vec(3);
-    vec.m_data[0] = 1;
-    vec.m_data[1] = 2;
-    vec.m_data[2] = 3;
+    vec.data()[0] = 1;
+    vec.data()[1] = 2;
+    vec.data()[2] = 3;
     
     vec.pop_back();
     EXPECT_EQ(vec.size(), 2);
@@ -647,7 +647,7 @@ TEST_F(VectorSpecificTests, ModifiersPopBackTest) {
 TEST_F(VectorSpecificTests, ModifiersResizeTest) {
     Vector<int> vec(3);
     for (size_t i = 0; i < 3; ++i) {
-        vec.m_data[i] = static_cast<int>(i);
+        vec.data()[i] = static_cast<int>(i);
     }
     
     vec.resize(5);
@@ -754,7 +754,7 @@ TEST_F(VectorSpecificTests, EdgeCaseEmptyVectorTest) {
 
 TEST_F(VectorSpecificTests, EdgeCaseSingleElementTest) {
     Vector<int> vec(1);
-    vec.m_data[0] = 42;
+    vec.data()[0] = 42;
     
     EXPECT_FALSE(vec.empty());
     EXPECT_EQ(vec.size(), 1);
@@ -769,10 +769,10 @@ TEST_F(VectorSpecificTests, MemoryLayoutTest) {
     Vector<int> vec(5);
     
     for (size_t i = 0; i < 5; ++i) {
-        vec.m_data[i] = static_cast<int>(i);
+        vec.data()[i] = static_cast<int>(i);
     }
     
     for (size_t i = 1; i < 5; ++i) {
-        EXPECT_EQ(&vec.m_data[i], &vec.m_data[i-1] + 1);
+        EXPECT_EQ(&vec.data()[i], &vec.data()[i-1] + 1);
     }
 }
