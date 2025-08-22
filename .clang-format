@@ -26,7 +26,7 @@ Cpp11BracedListStyle: true
 KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-PointerAlignment: Left
+PointerAlignment: Right
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: false
 SpaceBeforeAssignmentOperators: true

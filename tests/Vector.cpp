@@ -60,13 +60,13 @@ TYPED_TEST(VectorTypedTests, CopyConstructorTest) {
     Vector<TypeParam> original(count);
 
     Vector<TypeParam> copy(original);
-    EXPECT_NE(copy.m_data, nullptr);
-    EXPECT_NE(copy.m_data, original.m_data);
-    EXPECT_EQ(copy.m_size, original.m_size);
-    EXPECT_EQ(copy.m_capacity, original.m_capacity);
+    EXPECT_NE(copy.data(), nullptr);
+    EXPECT_NE(copy.data(), original.data());
+    EXPECT_EQ(copy.size(), original.size());
+    EXPECT_EQ(copy.capacity(), original.capacity());
 
     for (size_t i = 0; i < count; ++i) {
-        EXPECT_EQ(copy.m_data[i], original.m_data[i]);
+        EXPECT_EQ(copy.data()[i], original.data()[i]);
     }
 }
 
@@ -74,40 +74,40 @@ TYPED_TEST(VectorTypedTests, CopyConstructorEmptyTest) {
     Vector<TypeParam> original;
     Vector<TypeParam> copy(original);
 
-    EXPECT_EQ(copy.m_data, nullptr);
-    EXPECT_EQ(copy.m_size, 0);
-    EXPECT_EQ(copy.m_capacity, 0);
+    EXPECT_EQ(copy.data(), nullptr);
+    EXPECT_EQ(copy.size(), 0);
+    EXPECT_EQ(copy.capacity(), 0);
 }
 
 TYPED_TEST(VectorTypedTests, MoveConstructorTest) {
     const size_t count = 4;
     Vector<TypeParam> original(count);
-    auto original_data = original.m_data;
-    auto original_size = original.m_size;
-    auto original_capacity = original.m_capacity;
+    auto original_data = original.data();
+    auto original_size = original.size();
+    auto original_capacity = original.capacity();
 
     Vector<TypeParam> moved(std::move(original));
 
-    EXPECT_EQ(moved.m_data, original_data);
-    EXPECT_EQ(moved.m_size, original_size);
-    EXPECT_EQ(moved.m_capacity, original_capacity);
+    EXPECT_EQ(moved.data(), original_data);
+    EXPECT_EQ(moved.size(), original_size);
+    EXPECT_EQ(moved.capacity(), original_capacity);
 
-    EXPECT_EQ(original.m_data, nullptr);
-    EXPECT_EQ(original.m_size, 0);
-    EXPECT_EQ(original.m_capacity, 0);
+    EXPECT_EQ(original.data(), nullptr);
+    EXPECT_EQ(original.size(), 0);
+    EXPECT_EQ(original.capacity(), 0);
 }
 
 TYPED_TEST(VectorTypedTests, MoveConstructorEmptyTest) {
     Vector<TypeParam> original;
     Vector<TypeParam> moved(std::move(original));
 
-    EXPECT_EQ(moved.m_data, nullptr);
-    EXPECT_EQ(moved.m_size, 0);
-    EXPECT_EQ(moved.m_capacity, 0);
+    EXPECT_EQ(moved.data(), nullptr);
+    EXPECT_EQ(moved.size(), 0);
+    EXPECT_EQ(moved.capacity(), 0);
 
-    EXPECT_EQ(original.m_data, nullptr);
-    EXPECT_EQ(original.m_size, 0);
-    EXPECT_EQ(original.m_capacity, 0);
+    EXPECT_EQ(original.data(), nullptr);
+    EXPECT_EQ(original.size(), 0);
+    EXPECT_EQ(original.capacity(), 0);
 }
 
 TYPED_TEST(VectorTypedTests, DestructorTest) {
@@ -122,12 +122,12 @@ TYPED_TEST(VectorTypedTests, CopyAssignmentTest) {
 
     vec1 = vec2;
 
-    EXPECT_NE(vec1.m_data, vec2.m_data);
-    EXPECT_EQ(vec1.m_size, vec2.m_size);
-    EXPECT_EQ(vec1.m_capacity, vec2.m_capacity);
+    EXPECT_NE(vec1.data(), vec2.data());
+    EXPECT_EQ(vec1.size(), vec2.size());
+    EXPECT_EQ(vec1.capacity(), vec2.capacity());
 
     for (size_t i = 0; i < count2; ++i) {
-        EXPECT_EQ(vec1.m_data[i], vec2.m_data[i]);
+        EXPECT_EQ(vec1.data()[i], vec2.data()[i]);
     }
 }
 
@@ -149,9 +149,9 @@ TYPED_TEST(VectorTypedTests, CopyAssignmentEmptyToNonEmptyTest) {
 
     nonEmpty = empty;
 
-    EXPECT_NE(nonEmpty.m_data, nullptr);
-    EXPECT_EQ(nonEmpty.m_size, 0);
-    EXPECT_EQ(nonEmpty.m_capacity, 0);
+    EXPECT_NE(nonEmpty.data(), nullptr);
+    EXPECT_EQ(nonEmpty.size(), 0);
+    EXPECT_EQ(nonEmpty.capacity(), 0);
 }
 
 TYPED_TEST(VectorTypedTests, MoveAssignmentTest) {
@@ -160,19 +160,19 @@ TYPED_TEST(VectorTypedTests, MoveAssignmentTest) {
     Vector<TypeParam> vec1(count1);
     Vector<TypeParam> vec2(count2);
 
-    auto vec2_data = vec2.m_data;
-    auto vec2_size = vec2.m_size;
-    auto vec2_capacity = vec2.m_capacity;
+    auto vec2_data = vec2.data();
+    auto vec2_size = vec2.size();
+    auto vec2_capacity = vec2.capacity();
 
     vec1 = std::move(vec2);
 
-    EXPECT_EQ(vec1.m_data, vec2_data);
-    EXPECT_EQ(vec1.m_size, vec2_size);
-    EXPECT_EQ(vec1.m_capacity, vec2_capacity);
+    EXPECT_EQ(vec1.data(), vec2_data);
+    EXPECT_EQ(vec1.size(), vec2_size);
+    EXPECT_EQ(vec1.capacity(), vec2_capacity);
 
-    EXPECT_EQ(vec2.m_data, nullptr);
-    EXPECT_EQ(vec2.m_size, 0);
-    EXPECT_EQ(vec2.m_capacity, 0);
+    EXPECT_EQ(vec2.data(), nullptr);
+    EXPECT_EQ(vec2.size(), 0);
+    EXPECT_EQ(vec2.capacity(), 0);
 }
 
 TYPED_TEST(VectorTypedTests, MoveAssignmentSelfTest) {
@@ -204,7 +204,7 @@ struct ThrowingType {
         }
     }
 
-    ThrowingType(const ThrowingType& other) : value(other.value) {
+    ThrowingType(const ThrowingType &other) : value(other.value) {
         if (should_throw && ++construction_count > 3) {
             throw std::runtime_error("Copy construction failed");
         }
@@ -212,7 +212,7 @@ struct ThrowingType {
 
     ~ThrowingType() { --construction_count; }
 
-    ThrowingType& operator=(const ThrowingType& other) {
+    ThrowingType &operator=(const ThrowingType &other) {
         value = other.value;
         return *this;
     }
@@ -259,7 +259,7 @@ TEST_F(VectorSpecificTests, ComplexTypeTest) {
         ComplexType() : value(0), name("default") {}
         ComplexType(int v, std::string n) : value(v), name(std::move(n)) {}
 
-        bool operator==(const ComplexType& other) const { return value == other.value && name == other.name; }
+        bool operator==(const ComplexType &other) const { return value == other.value && name == other.name; }
     };
 
     Vector<ComplexType> vec(3);
@@ -277,8 +277,8 @@ TEST_F(VectorSpecificTests, IteratorBasicTest) {
     Vector<int>::Iterator it(vec.data());
     Vector<int>::Iterator default_it;
 
-    EXPECT_EQ(it.m_ptr, vec.data());
-    EXPECT_EQ(default_it.m_ptr, nullptr);
+    EXPECT_EQ(&(*it), vec.data());
+    EXPECT_EQ(default_it.operator->(), nullptr);
 }
 
 TEST_F(VectorSpecificTests, IteratorDereferenceTest) {
@@ -297,7 +297,7 @@ TEST_F(VectorSpecificTests, IteratorAssignmentTest) {
     Vector<int>::Iterator it2;
 
     it2 = it1;
-    EXPECT_EQ(it2.m_ptr, it1.m_ptr);
+    EXPECT_EQ(&(*it2), &(*it1));
 }
 
 TEST_F(VectorSpecificTests, ElementAccessAtTest) {
@@ -310,7 +310,7 @@ TEST_F(VectorSpecificTests, ElementAccessAtTest) {
         EXPECT_EQ(vec.at(i), static_cast<int>(i * 10));
     }
 
-    const Vector<int>& const_vec = vec;
+    const Vector<int> &const_vec = vec;
     for (size_t i = 0; i < 5; ++i) {
         EXPECT_EQ(const_vec.at(i), static_cast<int>(i * 10));
     }
@@ -322,7 +322,7 @@ TEST_F(VectorSpecificTests, ElementAccessAtOutOfBoundsTest) {
     EXPECT_THROW(vec.at(3), std::out_of_range);
     EXPECT_THROW(vec.at(100), std::out_of_range);
 
-    const Vector<int>& const_vec = vec;
+    const Vector<int> &const_vec = vec;
     EXPECT_THROW(const_vec.at(3), std::out_of_range);
 }
 
@@ -336,7 +336,7 @@ TEST_F(VectorSpecificTests, ElementAccessBracketOperatorTest) {
         EXPECT_EQ(vec[i], static_cast<int>(i * 10));
     }
 
-    const Vector<int>& const_vec = vec;
+    const Vector<int> &const_vec = vec;
     for (size_t i = 0; i < 5; ++i) {
         EXPECT_EQ(const_vec[i], static_cast<int>(i * 10));
     }
@@ -353,7 +353,7 @@ TEST_F(VectorSpecificTests, ElementAccessFrontTest) {
 
     EXPECT_EQ(vec.front(), 42);
 
-    const Vector<int>& const_vec = vec;
+    const Vector<int> &const_vec = vec;
     EXPECT_EQ(const_vec.front(), 42);
 
     vec.front() = 999;
@@ -368,7 +368,7 @@ TEST_F(VectorSpecificTests, ElementAccessBackTest) {
 
     EXPECT_EQ(vec.back(), 200);
 
-    const Vector<int>& const_vec = vec;
+    const Vector<int> &const_vec = vec;
     EXPECT_EQ(const_vec.back(), 200);
 
     vec.back() = 999;
@@ -380,7 +380,7 @@ TEST_F(VectorSpecificTests, ElementAccessDataTest) {
 
     EXPECT_EQ(vec.data(), vec.data());
 
-    const Vector<int>& const_vec = vec;
+    const Vector<int> &const_vec = vec;
     EXPECT_EQ(const_vec.data(), vec.data());
 
     Vector<int> empty_vec;
@@ -396,19 +396,19 @@ TEST_F(VectorSpecificTests, IteratorBeginEndTest) {
     auto it_begin = vec.begin();
     auto it_end = vec.end();
 
-    EXPECT_EQ(it_begin.m_ptr, vec.data());
-    EXPECT_EQ(it_end.m_ptr, vec.data() + 5);
+    EXPECT_EQ(&(*it_begin), vec.data());
+    EXPECT_EQ(&(*it_end), vec.data() + 5);
 
-    const Vector<int>& const_vec = vec;
+    const Vector<int> &const_vec = vec;
     auto const_it_begin = const_vec.begin();
     auto const_it_end = const_vec.end();
     auto cbegin_it = const_vec.cbegin();
     auto cend_it = const_vec.cend();
 
-    EXPECT_EQ(const_it_begin.m_ptr, vec.data());
-    EXPECT_EQ(const_it_end.m_ptr, vec.data() + 5);
-    EXPECT_EQ(cbegin_it.m_ptr, vec.data());
-    EXPECT_EQ(cend_it.m_ptr, vec.data() + 5);
+    EXPECT_EQ(&(*const_it_begin), vec.data());
+    EXPECT_EQ(&(*const_it_end), vec.data() + 5);
+    EXPECT_EQ(&(*cbegin_it), vec.data());
+    EXPECT_EQ(&(*cend_it), vec.data() + 5);
 }
 
 TEST_F(VectorSpecificTests, IteratorIncrementDecrementTest) {
@@ -611,7 +611,7 @@ TEST_F(VectorSpecificTests, ModifiersPushBackTest) {
 TEST_F(VectorSpecificTests, ModifiersEmplaceBackTest) {
     Vector<std::string> vec;
 
-    auto& ref = vec.emplace_back("hello", 5);
+    auto &ref = vec.emplace_back("hello", 5);
     EXPECT_EQ(ref, "hello");
     EXPECT_EQ(vec.size(), 1);
     EXPECT_EQ(vec[0], "hello");
@@ -669,19 +669,19 @@ TEST_F(VectorSpecificTests, ModifiersSwapTest) {
     Vector<int> vec2(5);
 
     for (size_t i = 0; i < 3; ++i) {
-        vec1.m_data[i] = static_cast<int>(i);
+        vec1.data()[i] = static_cast<int>(i);
     }
     for (size_t i = 0; i < 5; ++i) {
-        vec2.m_data[i] = static_cast<int>(i * 10);
+        vec2.data()[i] = static_cast<int>(i * 10);
     }
 
-    auto vec1_data = vec1.m_data;
-    auto vec2_data = vec2.m_data;
+    auto vec1_data = vec1.data();
+    auto vec2_data = vec2.data();
 
     vec1.swap(vec2);
 
-    EXPECT_EQ(vec1.m_data, vec2_data);
-    EXPECT_EQ(vec2.m_data, vec1_data);
+    EXPECT_EQ(vec1.data(), vec2_data);
+    EXPECT_EQ(vec2.data(), vec1_data);
     EXPECT_EQ(vec1.size(), 5);
     EXPECT_EQ(vec2.size(), 3);
     EXPECT_EQ(vec1.capacity(), 5);

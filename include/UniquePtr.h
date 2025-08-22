@@ -15,9 +15,9 @@ template<class T> class UniquePtr {
   public:
     // Constructors
     constexpr UniquePtr() noexcept : m_ptr(nullptr) {}
-    explicit UniquePtr(T* ptr) noexcept : m_ptr(ptr) {}
-    UniquePtr(const UniquePtr& other) = delete;
-    UniquePtr(UniquePtr&& other) noexcept {
+    explicit UniquePtr(T *ptr) noexcept : m_ptr(ptr) {}
+    UniquePtr(const UniquePtr &other) = delete;
+    UniquePtr(UniquePtr &&other) noexcept {
         m_ptr = other.m_ptr;
         other.m_ptr = nullptr;
     }
@@ -26,8 +26,8 @@ template<class T> class UniquePtr {
     ~UniquePtr() { reset(); }
 
     // Assignment
-    UniquePtr& operator=(const UniquePtr& other) = delete;
-    UniquePtr& operator=(UniquePtr&& other) noexcept {
+    UniquePtr &operator=(const UniquePtr &other) = delete;
+    UniquePtr &operator=(UniquePtr &&other) noexcept {
         if (this != &other) {
             delete m_ptr;
             m_ptr = other.m_ptr;
@@ -38,33 +38,33 @@ template<class T> class UniquePtr {
     }
 
     /* The caller is responsible for cleaning up the object (e.g. by use of get_deleter()). */
-    T* release() noexcept {
-        T* ptrCpy = m_ptr;
+    T *release() noexcept {
+        T *ptrCpy = m_ptr;
         m_ptr = nullptr;
         return ptrCpy;
     }
 
     // T*() == nullptr...
-    constexpr void reset(T* ptr = nullptr) noexcept {
+    constexpr void reset(T *ptr = nullptr) noexcept {
         if (m_ptr != ptr) {
             delete m_ptr;
             m_ptr = ptr;
         }
     }
 
-    void swap(UniquePtr& other) noexcept { std::swap(m_ptr, other.m_ptr); }
+    void swap(UniquePtr &other) noexcept { std::swap(m_ptr, other.m_ptr); }
 
-    T* get() const noexcept { return m_ptr; }
+    T *get() const noexcept { return m_ptr; }
     explicit operator bool() const noexcept { return m_ptr != nullptr; }
 
     // "If get() is a nullptr, the behavior is undefined."
-    T& operator*() const noexcept { return *m_ptr; }
-    T* operator->() const noexcept { return m_ptr; }
+    T &operator*() const noexcept { return *m_ptr; }
+    T *operator->() const noexcept { return m_ptr; }
 
   private:
-    T* m_ptr;
+    T *m_ptr;
 };
 
-template<class T, class... Args> UniquePtr<T> MakeUnique(Args&&... args) {
+template<class T, class... Args> UniquePtr<T> MakeUnique(Args &&... args) {
     return UniquePtr<T>(new T(std::forward<Args>(args)...));
 }

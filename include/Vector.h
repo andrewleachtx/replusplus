@@ -10,17 +10,17 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
         using iterator_category = std::random_access_iterator_tag;
         using value_type = T;
         using difference_type = std::ptrdiff_t;
-        using pointer = T*;
-        using reference = T&;
+        using pointer = T *;
+        using reference = T &;
 
         Iterator() = default;
         explicit Iterator(pointer ptr) : m_ptr(ptr) {}
-        Iterator& operator=(const Iterator&) noexcept = default;
+        Iterator &operator=(const Iterator &) noexcept = default;
 
         [[nodiscard]] reference operator*() const { return *m_ptr; }
         [[nodiscard]] pointer operator->() const { return m_ptr; }
 
-        Iterator& operator++() noexcept {
+        Iterator &operator++() noexcept {
             ++m_ptr;
             return *this;
         }
@@ -29,7 +29,7 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
             m_ptr++;
             return cpy;
         }
-        Iterator& operator--() noexcept {
+        Iterator &operator--() noexcept {
             --m_ptr;
             return *this;
         }
@@ -41,10 +41,10 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
 
         [[nodiscard]] Iterator operator+(difference_type n) const { return Iterator(m_ptr + n); }
         [[nodiscard]] Iterator operator-(difference_type n) const { return Iterator(m_ptr - n); }
-        difference_type operator-(const Iterator& rhs) { return m_ptr - rhs.m_ptr; }
+        difference_type operator-(const Iterator &rhs) { return m_ptr - rhs.m_ptr; }
 
         // TODO: Learn how to define three way comparison operator manually
-        auto operator<=>(const Iterator& rhs) const = default;
+        auto operator<=>(const Iterator &rhs) const = default;
 
         pointer m_ptr = nullptr;
     };
@@ -53,8 +53,8 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
     using allocator_type = Allocator;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
-    using reference = value_type&;
-    using const_reference = const value_type&;
+    using reference = value_type &;
+    using const_reference = const value_type &;
     using pointer = std::allocator_traits<Allocator>::pointer;
     using const_pointer = std::allocator_traits<Allocator>::const_pointer;
     using iterator = Iterator;
@@ -63,25 +63,24 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
     using traits = std::allocator_traits<allocator_type>;
 
     Vector() = default;
-    explicit Vector(size_type count, const allocator_type& alloc = allocator_type())
-        : m_data(nullptr), m_size(count), m_capacity(count), m_alloc(alloc) {
-        m_data = traits::allocate(alloc, count);
-
-        for (size_type i = 0; i < count; i++) {
-            // Anywhere we do m_data + i, we could also do &m_data[i] if it is more intuitive.
-            std::allocator<allocator_type>::construct(m_alloc, m_data + i, value_type());
-        }
-    }
-    constexpr Vector(size_type count, const_reference value = value_type(),
-                     const allocator_type& alloc = allocator_type())
+    explicit Vector(size_type count, const allocator_type &alloc = allocator_type())
         : m_data(nullptr), m_size(count), m_capacity(count), m_alloc(alloc) {
         m_data = traits::allocate(m_alloc, count);
 
         for (size_type i = 0; i < count; i++) {
-            std::allocator<allocator_type>::construct(m_alloc, m_data + i, value);
+            // Anywhere we do m_data + i, we could also do &m_data[i] if it is more intuitive.
+            traits::construct(m_alloc, m_data + i, value_type());
         }
     }
-    constexpr Vector(const Vector& other)
+    constexpr Vector(size_type count, const_reference value, const allocator_type &alloc = allocator_type())
+        : m_data(nullptr), m_size(count), m_capacity(count), m_alloc(alloc) {
+        m_data = traits::allocate(m_alloc, count);
+
+        for (size_type i = 0; i < count; i++) {
+            traits::construct(m_alloc, m_data + i, value);
+        }
+    }
+    constexpr Vector(const Vector &other)
         : m_data(nullptr),
           m_size(other.m_size),
           m_capacity(other.m_capacity),
@@ -92,7 +91,7 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
             traits::construct(m_alloc, m_data + i, other.m_data[i]);
         }
     }
-    constexpr Vector(Vector&& other) noexcept
+    constexpr Vector(Vector &&other) noexcept
         : m_data(other.m_data), m_size(other.m_size), m_capacity(other.m_capacity), m_alloc(std::move(other.m_alloc)) {
         other.m_data = nullptr;
         other.m_size = 0;
@@ -102,7 +101,7 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
 
     ~Vector() { reset(); }
 
-    constexpr Vector& operator=(const Vector& other) {
+    constexpr Vector &operator=(const Vector &other) {
         if (this != &other) {
             // Assume we need to destroy all of our values even if we don't
             reset();
@@ -121,7 +120,7 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
 
         return *this;
     }
-    Vector& operator=(Vector&& other) noexcept {
+    Vector &operator=(Vector &&other) noexcept {
         if (this != &other) {
             m_data = other.m_data;
             m_size = other.m_size;
@@ -136,7 +135,7 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
 
         return *this;
     }
-    Vector& operator=(std::initializer_list<value_type> ilist) {
+    Vector &operator=(std::initializer_list<value_type> ilist) {
         // Destroy and dealloc
         reset();
 
@@ -213,14 +212,15 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
         m_size = 0;
     }
 
-    constexpr iterator insert(const_iterator pos, const value_type& value) { /* TODO */
+    constexpr iterator insert(const_iterator pos, const value_type &value) {}
+    constexpr iterator insert(const_iterator pos, value_type &&value) { /* TODO */
     }
-    constexpr iterator insert(const_iterator pos, value_type&& value) { /* TODO */
+    constexpr iterator insert(const_iterator pos, size_type count, const value_type &value) { /* TODO */
     }
-    constexpr iterator insert(const_iterator pos, std::initializer_list<T> ilist) { /* TODO */
+    constexpr iterator insert(const_iterator pos, const_iterator first, const_iterator last) { /* TODO */
     }
 
-    template<typename... Args> constexpr iterator emplace(const_iterator, Args&&... args) { /* TODO */
+    template<typename... Args> constexpr iterator emplace(const_iterator, Args &&... args) { /* TODO */
     }
 
     constexpr iterator erase(iterator pos) { /* TODO */
@@ -228,14 +228,14 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
     constexpr iterator erase(iterator first, iterator last) { /* TODO */
     }
 
-    constexpr void push_back(const T& value) { /* TODO */
+    constexpr void push_back(const T &value) { /* TODO */
     }
-    constexpr void push_back(T&& value) { /* TODO */
+    constexpr void push_back(T &&value) { /* TODO */
     }
 
-    template<typename... Args> constexpr void emplace_back(Args&&... args) { /* TODO */
+    template<typename... Args> constexpr void emplace_back(Args &&... args) { /* TODO */
     }
-    template<typename... Args> constexpr reference emplace_back(Args&&... args) { /* TODO */
+    template<typename... Args> constexpr reference emplace_back(Args &&... args) { /* TODO */
     }
 
     constexpr void pop_back() { /* TODO */
@@ -243,10 +243,10 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
 
     constexpr void resize(size_type count) { /* TODO */
     }
-    constexpr void resize(size_type count, const value_type& value) { /* TODO */
+    constexpr void resize(size_type count, const value_type &value) { /* TODO */
     }
 
-    constexpr void swap(Vector& other) noexcept { /* TODO */
+    constexpr void swap(Vector &other) noexcept { /* TODO */
     }
 
   private:

@@ -15,7 +15,7 @@ TYPED_TEST(UniquePtrTypedTests, DefaultConstructorTest) {
 }
 
 TYPED_TEST(UniquePtrTypedTests, RawPtrConstructorTest) {
-    auto* rawPtr = new TypeParam();
+    auto *rawPtr = new TypeParam();
     UniquePtr<TypeParam> ptr(rawPtr);
     EXPECT_EQ(ptr.get(), rawPtr);
     EXPECT_TRUE(ptr);
@@ -59,9 +59,9 @@ TYPED_TEST(UniquePtrTypedTests, MoveCopyOperatorSelfAssignmentTest) {
 }
 
 TYPED_TEST(UniquePtrTypedTests, ReleaseTest) {
-    auto* rawPtr = new TypeParam();
+    auto *rawPtr = new TypeParam();
     UniquePtr<TypeParam> ptr(rawPtr);
-    auto* got = ptr.release();
+    auto *got = ptr.release();
     EXPECT_EQ(got, rawPtr);
     EXPECT_FALSE(ptr);
 
@@ -69,8 +69,8 @@ TYPED_TEST(UniquePtrTypedTests, ReleaseTest) {
 }
 
 TYPED_TEST(UniquePtrTypedTests, ResetTest) {
-    auto* rawPtr1 = new TypeParam();
-    auto* rawPtr2 = new TypeParam();
+    auto *rawPtr1 = new TypeParam();
+    auto *rawPtr2 = new TypeParam();
 
     UniquePtr<TypeParam> ptr(rawPtr1);
     ptr.reset(rawPtr2);
@@ -81,8 +81,8 @@ TYPED_TEST(UniquePtrTypedTests, ResetTest) {
 }
 
 TYPED_TEST(UniquePtrTypedTests, SwapTest) {
-    auto* rawPtrA = new TypeParam();
-    auto* rawPtrB = new TypeParam();
+    auto *rawPtrA = new TypeParam();
+    auto *rawPtrB = new TypeParam();
     UniquePtr<TypeParam> a(rawPtrA);
     UniquePtr<TypeParam> b(rawPtrB);
 
@@ -92,7 +92,7 @@ TYPED_TEST(UniquePtrTypedTests, SwapTest) {
 }
 
 TYPED_TEST(UniquePtrTypedTests, GetTest) {
-    auto* rawPtr = new TypeParam();
+    auto *rawPtr = new TypeParam();
     UniquePtr<TypeParam> ptr(rawPtr);
 
     EXPECT_EQ(ptr.get(), rawPtr);
@@ -110,7 +110,7 @@ TYPED_TEST(UniquePtrTypedTests, DereferenceAndArrowTest) {
     UniquePtr<TypeParam> ptr(new TypeParam());
 
     EXPECT_NO_THROW({
-        TypeParam& ref = *ptr;
+        TypeParam &ref = *ptr;
         (void)ref;
     });
 

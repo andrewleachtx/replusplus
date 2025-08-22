@@ -16,7 +16,7 @@ TYPED_TEST(SharedPtrTypedTests, DefaultConstructorTest) {
 }
 
 TYPED_TEST(SharedPtrTypedTests, RawPtrConstructorTest) {
-    auto* rawPtr = new TypeParam();
+    auto *rawPtr = new TypeParam();
     SharedPtr<TypeParam> ptr(rawPtr);
     EXPECT_EQ(ptr.get(), rawPtr);
     EXPECT_EQ(ptr.use_count(), 1ULL);
@@ -24,7 +24,7 @@ TYPED_TEST(SharedPtrTypedTests, RawPtrConstructorTest) {
 }
 
 TYPED_TEST(SharedPtrTypedTests, CopyConstructorTest) {
-    auto* rawPtr = new TypeParam();
+    auto *rawPtr = new TypeParam();
     SharedPtr<TypeParam> a(rawPtr);
     SharedPtr<TypeParam> b(a);
     EXPECT_EQ(a.get(), b.get());
@@ -33,7 +33,7 @@ TYPED_TEST(SharedPtrTypedTests, CopyConstructorTest) {
 }
 
 TYPED_TEST(SharedPtrTypedTests, CopyOperatorTest) {
-    auto* rawPtr = new TypeParam();
+    auto *rawPtr = new TypeParam();
     SharedPtr<TypeParam> a(rawPtr);
     SharedPtr<TypeParam> b;
     b = a;
@@ -43,7 +43,7 @@ TYPED_TEST(SharedPtrTypedTests, CopyOperatorTest) {
 }
 
 TYPED_TEST(SharedPtrTypedTests, MoveConstructorTest) {
-    auto* rawPtr = new TypeParam();
+    auto *rawPtr = new TypeParam();
     SharedPtr<TypeParam> a(rawPtr);
     SharedPtr<TypeParam> b(std::move(a));
     EXPECT_EQ(b.get(), rawPtr);
@@ -72,7 +72,7 @@ TYPED_TEST(SharedPtrTypedTests, MoveCopyOperatorSelfAssignmentTest) {
 }
 
 TYPED_TEST(SharedPtrTypedTests, ResetTest) {
-    auto* rawPtr = new TypeParam();
+    auto *rawPtr = new TypeParam();
     SharedPtr<TypeParam> ptr(rawPtr);
 
     ptr.reset();
@@ -81,7 +81,7 @@ TYPED_TEST(SharedPtrTypedTests, ResetTest) {
 }
 
 TYPED_TEST(SharedPtrTypedTests, ResetToPtrTest) {
-    auto* raw = new TypeParam();
+    auto *raw = new TypeParam();
     SharedPtr<TypeParam> p1(raw);
     SharedPtr<TypeParam> p2 = p1;
     EXPECT_EQ(p1.use_count(), 2u);
@@ -95,7 +95,7 @@ TYPED_TEST(SharedPtrTypedTests, ResetToPtrTest) {
 }
 
 TYPED_TEST(SharedPtrTypedTests, ResetToNullTest) {
-    auto* rawPtr = new TypeParam();
+    auto *rawPtr = new TypeParam();
     SharedPtr<TypeParam> ptr(rawPtr);
     EXPECT_EQ(ptr.use_count(), 1ULL);
     ptr.reset(nullptr);
@@ -104,8 +104,8 @@ TYPED_TEST(SharedPtrTypedTests, ResetToNullTest) {
 }
 
 TYPED_TEST(SharedPtrTypedTests, SwapTest) {
-    auto* rawPtrA = new TypeParam();
-    auto* rawPtrB = new TypeParam();
+    auto *rawPtrA = new TypeParam();
+    auto *rawPtrB = new TypeParam();
     SharedPtr<TypeParam> a(rawPtrA);
     SharedPtr<TypeParam> b(rawPtrB);
 
@@ -119,7 +119,7 @@ TYPED_TEST(SharedPtrTypedTests, SwapTest) {
 }
 
 TYPED_TEST(SharedPtrTypedTests, GetTest) {
-    auto* rawPtr = new TypeParam();
+    auto *rawPtr = new TypeParam();
     SharedPtr<TypeParam> ptr(rawPtr);
 
     EXPECT_EQ(ptr.get(), rawPtr);
@@ -137,7 +137,7 @@ TYPED_TEST(SharedPtrTypedTests, DereferenceAndArrowTest) {
     SharedPtr<TypeParam> ptr(new TypeParam());
 
     EXPECT_NO_THROW({
-        TypeParam& ref = *ptr;
+        TypeParam &ref = *ptr;
         (void)ref;
     });
 
@@ -171,7 +171,7 @@ TYPED_TEST(SharedPtrTypedTests, ResetEmptyDoesNothing) {
 }
 
 TYPED_TEST(SharedPtrTypedTests, SelfSwapAllowed) {
-    auto* raw = new TypeParam();
+    auto *raw = new TypeParam();
     SharedPtr<TypeParam> p(raw);
     EXPECT_NO_THROW(p.swap(p));
     EXPECT_EQ(p.get(), raw);
