@@ -4,16 +4,12 @@ Reimplementing various components of the C++ STL. Maybe other stuff, e.g. linalg
 Testing with gtest, and using cppreference heavily. Headers are source.
 
 # Building & Running Tests
-Build
-```sh
-cmake -S . -B build
-cmake --build build -j
-```
+The project was built on g++ with GNU 10.5 and CMake.
 
-Run
-```sh
+Run `build.sh` to create the available tests, and evaluate them with 
 
-```
+# Development
+Format with `clang-format -i include/*.h tests/*.cpp`. The pre-commit hook checks for this.
 
 # TODO
 - [x] unique_ptr

@@ -1,3 +1,5 @@
+#include <initializer_list>
+#include <limits>
 #include <memory>
 
 const size_t GROWTH_FACTOR = 2UL;
@@ -66,6 +68,7 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
         m_data = traits::allocate(alloc, count);
 
         for (size_type i = 0; i < count; i++) {
+            // Anywhere we do m_data + i, we could also do &m_data[i] if it is more intuitive.
             std::allocator<allocator_type>::construct(m_alloc, m_data + i, value_type());
         }
     }
@@ -97,25 +100,12 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
         other.m_alloc = allocator_type{};
     }
 
-    ~Vector() {
-        for (size_type i = 0; i < m_size; i++) {
-            traits::destroy(m_alloc, m_data + i);
-        }
-
-        if (m_data) {
-            traits::deallocate(m_alloc, m_data, m_capacity);
-        }
-    }
+    ~Vector() { reset(); }
 
     constexpr Vector& operator=(const Vector& other) {
         if (this != &other) {
             // Assume we need to destroy all of our values even if we don't
-            for (size_type i = 0; i < m_size; i++) {
-                traits::destroy(m_alloc, m_data + i);
-            }
-
-            // TODO: Possibly check for difference in capacity to avoid unnecessary alloc/dealloc
-            traits::deallocate(m_alloc, m_data, m_capacity);
+            reset();
 
             if constexpr (traits::propagate_on_container_copy_assignment::value) {
             }
@@ -146,7 +136,11 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
 
         return *this;
     }
-    Vector& operator=(std::initializer_list<value_type> ilist) { /* TODO */
+    Vector& operator=(std::initializer_list<value_type> ilist) {
+        // Destroy and dealloc
+        reset();
+
+        insert(this->end(), ilist.begin(), ilist.end());
     }
 
     constexpr void assign(size_type count, const_reference value) { /* TODO */
@@ -154,62 +148,76 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
     constexpr void assign(std::initializer_list<value_type> ilist) { /* TODO */
     }
 
-    constexpr allocator_type get_allocator() const { /* TODO */
+    constexpr allocator_type get_allocator() const { return m_alloc; }
+
+    constexpr reference at(size_type pos) {
+        if (pos >= m_size) {
+            throw std::out_of_range("Out of bounds access in .at(...)!");
+        }
+        return m_data[pos];
+    }
+    constexpr const_reference at(size_type pos) const {
+        if (pos >= m_size) {
+            throw std::out_of_range("Out of bounds access in .at(...)!");
+        }
+        return m_data[pos];
     }
 
-    constexpr reference at(size_type pos) { /* TODO */
-    }
-    constexpr const_reference at(size_type pos) const { /* TODO */
-    }
+    constexpr reference operator[](size_type pos) { return m_data[pos]; }
+    constexpr const_reference operator[](size_type pos) const { return m_data[pos]; }
 
-    constexpr reference operator[](size_type pos) { /* TODO */
-    }
-    constexpr const_reference operator[](size_type pos) const { /* TODO */
-    }
+    constexpr reference front() { return m_data[0]; }
+    constexpr const_reference front() const { return m_data[0]; }
 
-    constexpr reference front() { /* TODO */
-    }
-    constexpr const_reference front() const { /* TODO */
-    }
-
-    constexpr reference back() { /* TODO */
-    }
-    constexpr const_reference back() const { /* TODO */
-    }
+    constexpr reference back() { return m_data[m_size - 1]; }
+    constexpr const_reference back() const { return m_data[m_size - 1]; }
 
     constexpr pointer data() noexcept { return m_data; }
     constexpr const_pointer data() const noexcept { return m_data; }
 
-    constexpr iterator begin() noexcept { /* TODO */
-    }
-    constexpr const_iterator begin() const noexcept { /* TODO */
-    }
-    constexpr const_iterator cbegin() const noexcept { /* TODO */
-    }
+    constexpr iterator begin() noexcept { return iterator(m_data); }
+    constexpr const_iterator begin() const noexcept { return const_iterator(m_data); }
+    constexpr const_iterator cbegin() const noexcept { return const_iterator(m_data); }
 
-    constexpr iterator end() noexcept { /* TODO */
-    }
-    constexpr const_iterator end() const noexcept { /* TODO */
-    }
-    constexpr const_iterator cend() const noexcept { /* TODO */
-    }
+    constexpr iterator end() noexcept { return iterator(m_data + m_size); }
+    constexpr const_iterator end() const noexcept { return const_iterator(m_data + m_size); }
+    constexpr const_iterator cend() const noexcept { return const_iterator(m_data + m_size); }
 
     constexpr bool empty() const noexcept { return m_size == 0; }
     constexpr size_type size() const noexcept { return m_size; }
-    constexpr size_type max_size() const noexcept { /* TODO */
+    // Even if we theoretically have numbers bigger than size_t for memory, if we had to make a call of malloc with
+    // size_t nbytes = sizeof(T) * n, nbytes would exceed size_t
+    constexpr size_type max_size() const noexcept {
+        // return std::numeric_limits<size_type>::max() / sizeof(value_type);
+        return traits::max_size(m_alloc);
     }
-    constexpr void reserve(size_type new_cap) { /* TODO */
+    constexpr void reserve(size_type new_cap) {
+        if (new_cap > max_size()) {
+            throw std::length_error("New capacity exceeds maximum size!");
+        }
+        if (new_cap <= m_capacity) {
+            return;
+        }
+
+        // Reallocates new space of new_cap and copies into it.
+        reallocAndMove(new_cap);
     }
     constexpr size_type capacity() const noexcept { return m_capacity; }
-    constexpr void shrink_to_fit() { /* TODO */
-    }
+    constexpr void shrink_to_fit() { reallocAndMove(m_size); }
 
-    constexpr void clear() noexcept { /* TODO */
+    constexpr void clear() noexcept {
+        for (size_t i = 0; i < m_size; i++) {
+            traits::destroy(m_alloc, m_data + i);
+        }
+
+        m_size = 0;
     }
 
     constexpr iterator insert(const_iterator pos, const value_type& value) { /* TODO */
     }
     constexpr iterator insert(const_iterator pos, value_type&& value) { /* TODO */
+    }
+    constexpr iterator insert(const_iterator pos, std::initializer_list<T> ilist) { /* TODO */
     }
 
     template<typename... Args> constexpr iterator emplace(const_iterator, Args&&... args) { /* TODO */
@@ -246,4 +254,41 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
     size_type m_size;
     size_type m_capacity;
     [[no_unique_address]] allocator_type m_alloc;
+
+    void reallocAndMove(size_type new_cap) {
+        pointer new_data = traits::allocate(m_alloc, new_cap);
+
+        for (size_type i = 0; i < m_size; i++) {
+            traits::construct(m_alloc, new_data + i, std::move(m_data[i]));
+        }
+
+        for (size_type i = 0; i < m_size; i++) {
+            traits::destroy(m_alloc, m_data + i);
+        }
+
+        m_data = new_data;
+        m_capacity = new_cap;
+    }
+
+    /*
+        This is clear but deallocates and destroys memory. Could add a flag in clear for this as well, but users
+       shouldn't see that.
+
+        It comes as the cost of usually having some repeated instructions (e.g., m_data set to null to only be set to
+       new after, etc.) but poor readability/DRY is a cost itself too.
+    */
+    constexpr void reset() {
+        for (size_type i = 0; i < m_size; i++) {
+            traits::destroy(m_alloc, m_data + i);
+        }
+
+        if (m_data) {
+            traits::deallocate(m_alloc, m_data, m_capacity);
+        }
+
+        m_data = nullptr;
+        m_size = 0;
+        m_capacity = 0;
+        m_alloc = allocator_type{};
+    }
 };

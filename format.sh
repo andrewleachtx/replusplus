@@ -1,0 +1,1 @@
+clang-format -i tests/*.cpp include/*.h
