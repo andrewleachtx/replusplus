@@ -142,9 +142,27 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
         insert(this->end(), ilist.begin(), ilist.end());
     }
 
-    constexpr void assign(size_type count, const_reference value) { /* TODO */
+    constexpr void assign(size_type count, const_reference value) {
+        // Destruct existing elements (dont dealloc)
+        clear();
+
+        // Check if we can fit room, if not realloc and move
+        reserve(count);
+
+        for (size_type i = 0; i < count; i++) {
+            traits::construct(m_alloc, m_data + i, value);
+        }
+        m_size = count;
     }
-    constexpr void assign(std::initializer_list<value_type> ilist) { /* TODO */
+    constexpr void assign(std::initializer_list<value_type> ilist) {
+        clear();
+        reserve(ilist.size());
+
+        for (auto it = ilist.begin(); it != ilist.end(); it++) {
+            size_type i = it - ilist.begin();
+            traits::construct(m_alloc, m_data + i, *it);
+        }
+        m_size = ilist.size();
     }
 
     constexpr allocator_type get_allocator() const { return m_alloc; }
@@ -198,7 +216,7 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
             return;
         }
 
-        // Reallocates new space of new_cap and copies into it.
+        // Reallocates new space of new_cap and std::moves old values into it.
         reallocAndMove(new_cap);
     }
     constexpr size_type capacity() const noexcept { return m_capacity; }
@@ -212,12 +230,81 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
         m_size = 0;
     }
 
-    constexpr iterator insert(const_iterator pos, const value_type &value) {}
-    constexpr iterator insert(const_iterator pos, value_type &&value) { /* TODO */
+    /*
+        Insert should try to find the said position, insert value, and shift
+    */
+    constexpr iterator insert(const_iterator pos, const value_type &value) {
+        growIfNeeded();
+
+        difference_type posIdx = pos - cbegin();
+
+        // Shift all values over
+        for (size_type i = m_size; i > static_cast<size_type>(posIdx); i--) {
+            traits::construct(m_alloc, m_data + i, std::move(m_data[i - 1]));
+            traits::destroy(m_alloc, m_data + i - 1);
+        }
+
+        // Insert value at pos
+        traits::construct(m_alloc, m_data + posIdx, value);
+        m_size++;
+
+        return iterator(m_data + posIdx);
     }
-    constexpr iterator insert(const_iterator pos, size_type count, const value_type &value) { /* TODO */
+    constexpr iterator insert(const_iterator pos, value_type &&value) {
+        growIfNeeded();
+
+        difference_type posIdx = pos - cbegin();
+
+        // Shift all values over
+        for (size_type i = m_size; i > static_cast<size_type>(posIdx); i--) {
+            traits::construct(m_alloc, m_data + i, std::move(m_data[i - 1]));
+            traits::destroy(m_alloc, m_data + i - 1);
+        }
+
+        // Insert value at pos
+        traits::construct(m_alloc, m_data + posIdx, std::move(value));
+        m_size++;
+
+        return iterator(m_data + posIdx);
     }
-    constexpr iterator insert(const_iterator pos, const_iterator first, const_iterator last) { /* TODO */
+    constexpr iterator insert(const_iterator pos, size_type count, const value_type &value) {
+        growIfNeeded(count);
+
+        difference_type posIdx = pos - cbegin();
+
+        // Shift all elements over
+        for (size_type i = m_size + count - 1; i >= static_cast<size_type>(posIdx) + count; i--) {
+            traits::construct(m_alloc, m_data + i, std::move(m_data[i - count]));
+            traits::destroy(m_alloc, m_data + i - count);
+        }
+
+        // Insert count copies of value
+        for (size_type i = 0; i < count; i++) {
+            traits::construct(m_alloc, m_data + posIdx + i, value);
+        }
+
+        m_size += count;
+        return iterator(m_data + posIdx);
+    }
+    constexpr iterator insert(const_iterator pos, const_iterator first, const_iterator last) {
+        size_type count = static_cast<size_type>(last - first);
+
+        growIfNeeded(count);
+
+        difference_type posIdx = pos - cbegin();
+
+        for (size_type i = m_size + count - 1; i >= static_cast<size_type>(posIdx) + count; i--) {
+            traits::construct(m_alloc, m_data + i, std::move(m_data[i - count]));
+            traits::destroy(m_alloc, m_data + i - count);
+        }
+
+        auto it = first;
+        for (size_type i = 0; i < count; i++, it++) {
+            traits::construct(m_alloc, m_data + posIdx + i, *it);
+        }
+
+        m_size += count;
+        return iterator(m_data + posIdx);
     }
 
     template<typename... Args> constexpr iterator emplace(const_iterator, Args &&... args) { /* TODO */
@@ -238,12 +325,24 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
     template<typename... Args> constexpr reference emplace_back(Args &&... args) { /* TODO */
     }
 
-    constexpr void pop_back() { /* TODO */
+    // FIXME: Maybe we don't throw, is UB?
+    constexpr void pop_back() {
+        if (m_size == 0) {
+            throw std::runtime_error("pop_back() called on empty vector!");
+        }
+
+        m_size--;
     }
 
-    constexpr void resize(size_type count) { /* TODO */
-    }
-    constexpr void resize(size_type count, const value_type &value) { /* TODO */
+    // FIXME: Can this shrink the array? I think it can, so reallocAndMove() accounts for that
+    constexpr void resize(size_type count) { reallocAndMove(count); }
+    constexpr void resize(size_type count, const value_type &value) {
+        // TODO: Could add this overload, but lazy
+        // reallocAndMove(count, value);
+        reallocAndMove(count);
+        for (size_type i = 0; i < count; i++) {
+            m_data[i] = value;
+        }
     }
 
     constexpr void swap(Vector &other) noexcept { /* TODO */
@@ -255,18 +354,44 @@ template<typename T, typename Allocator = std::allocator<T>> class Vector {
     size_type m_capacity;
     [[no_unique_address]] allocator_type m_alloc;
 
-    void reallocAndMove(size_type new_cap) {
+    // Maybe make a void, but this can give you info
+    constexpr bool growIfNeeded(size_type numInserts = 1) {
+        size_type proposedSize = m_size + numInserts;
+        if (proposedSize > m_capacity) {
+            // For inserts that take multiple doubles we can avoid unnecessary allocs by doing in one call; find
+            // necessary new capacity
+            size_type grownCapacity = m_capacity == 0 ? 1 : m_capacity * GROWTH_FACTOR;
+            size_type newCapacity = std::max(proposedSize, grownCapacity);
+            reallocAndMove(newCapacity);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    constexpr void reallocAndMove(size_type new_cap) {
         pointer new_data = traits::allocate(m_alloc, new_cap);
 
-        for (size_type i = 0; i < m_size; i++) {
+        /*
+            In the case where new_cap < m_size (probably a resize call), we should avoid segfaulting by only
+            constructing spots that are in range.
+        */
+        size_t lesser_size = std::min(m_size, new_cap);
+
+        for (size_type i = 0; i < lesser_size; i++) {
             traits::construct(m_alloc, new_data + i, std::move(m_data[i]));
         }
 
+        // Still need to destroy the old array
         for (size_type i = 0; i < m_size; i++) {
             traits::destroy(m_alloc, m_data + i);
         }
 
+        traits::deallocate(m_alloc, m_data, m_capacity);
+
         m_data = new_data;
+        m_size = lesser_size;
         m_capacity = new_cap;
     }
 
