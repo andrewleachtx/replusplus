@@ -14,6 +14,7 @@ TEST(VectorTests, CTAD) {
 TEST(VectorTests, Smoke) {
     fun::vector<int> v = {1, 2, 3};
     EXPECT_EQ(v.size(), 3);
+    EXPECT_EQ(v.capacity(), 3);
 }
  
 TEST(VectorTests, ElementAccess) {
@@ -21,4 +22,11 @@ TEST(VectorTests, ElementAccess) {
     EXPECT_EQ(v[0], 1);
     EXPECT_EQ(v[1], 2);
     EXPECT_EQ(v[2], 3);
+}
+
+TEST(VectorTests, ElementAccessAt) {
+    fun::vector<int> v = {1, 2, 3};
+    EXPECT_EQ(v.at(0), 1);
+    EXPECT_EQ(v.at(1), 2);
+    EXPECT_EQ(v.at(2), 3);
 }

@@ -9,4 +9,10 @@ add_executable(vector_tests vector.cpp)
 target_link_libraries(vector_tests PRIVATE
     vector gtest gtest_main
 )
+target_compile_options(vector_tests PRIVATE
+    -Wall
+    -Wextra
+    -Werror
+    -pedantic
+)
 add_test(NAME vector_test COMMAND vector_tests)
