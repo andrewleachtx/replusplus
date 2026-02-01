@@ -62,3 +62,58 @@ TEST(VectorTests, ElementAccessAt) {
     EXPECT_EQ(v.at(1), 2);
     EXPECT_EQ(v.at(2), 3);
 }
+
+TEST(VectorTests, MoveAssign) {
+    fun::vector<float> v = {6.0f, 7.0f};
+    fun::vector<float> v2 = {4.2f, 3.0f};
+
+    v2 = std::move(v);
+
+    // v2 now has v's data
+    EXPECT_EQ(v2.size(), 2);
+    EXPECT_EQ(v2[0], 6.0f);
+    EXPECT_EQ(v2[1], 7.0f);
+
+    // v should be in a valid but empty state
+    EXPECT_EQ(v.size(), 0);
+}
+
+TEST(VectorTests, MoveCtor) {
+    fun::vector<float> v = {6.0f, 7.0f};
+
+    fun::vector<float> v2(std::move(v));
+
+    // v2 stole v's data
+    EXPECT_EQ(v2.size(), 2);
+    EXPECT_EQ(v2[0], 6.0f);
+    EXPECT_EQ(v2[1], 7.0f);
+
+    // v should be in a valid but empty state
+    EXPECT_EQ(v.size(), 0);
+    EXPECT_EQ(v.capacity(), 0);
+}
+
+TEST(VectorTests, PushBack) {
+    fun::vector<int> v;
+    v.push_back(10);
+    v.push_back(20);
+    v.push_back(30);
+
+    EXPECT_EQ(v.size(), 3);
+    EXPECT_EQ(v[0], 10);
+    EXPECT_EQ(v[1], 20);
+    EXPECT_EQ(v[2], 30);
+    EXPECT_GE(v.capacity(), 3);
+}
+
+TEST(VectorTests, PushBackMove) {
+    fun::vector<std::string> v;
+    std::string s = "hello";
+    v.push_back(std::move(s));
+
+    EXPECT_EQ(v.size(), 1);
+    EXPECT_EQ(v[0], "hello");
+
+    // s was moved from — should be empty
+    EXPECT_TRUE(s.empty());
+}
