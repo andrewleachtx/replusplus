@@ -4,3 +4,5 @@ UseTab: Never
 BreakBeforeBraces: Attach
 IndentCaseLabels: false
 AccessModifierOffset: -4
+PointerAlignment: Left
+ReferenceAlignment: Left

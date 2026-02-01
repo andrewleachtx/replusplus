@@ -1,6 +1,6 @@
-#include <iostream>
 #include <cstddef>
 #include <initializer_list>
+#include <iostream>
 #include <new>
 
 /*
@@ -14,25 +14,54 @@ namespace fun {
 template <typename T> class vector {
 public:
     vector() : data_{nullptr}, size_{0ULL}, capacity_{0ULL} {}
-    vector(const std::initializer_list<T> &list)
+    vector(const std::initializer_list<T>& list)
         : data_{}, size_{list.size()}, capacity_{list.size()} {
         data_ = raw_alloc_arr(size_);
         const T* list_arr = list.begin();
-        for (size_t i = 0; i < size_; i++) {
-            new (data_ + i) T(list_arr[i]);
-        }
+        copy_into_arr(data_, list_arr, size_);
     }
+    vector& operator=(const vector& other) {
+        if (this != &other) {
+            // Deallocate the elements we have
+            clear();
+
+            // Only do a realloc if the other buffer has a bigger capacity
+            if (other.capacity_ > capacity_) {
+                delete_arr(data_);
+                data_ = raw_alloc_arr(other.capacity_);
+
+                capacity_ = other.capacity_;
+            }
+
+            copy_into_arr(data_, other.data_, other.size_);
+            size_ = other.size_;
+        }
+
+        return *this;
+    }
+
+    vector(const vector& other)
+        : data_{}, size_{other.size_}, capacity_{other.capacity_} {
+        data_ = raw_alloc_arr(other.capacity_);
+        copy_into_arr(data_, other.data_, other.size_);
+    }
+
     ~vector() {
-        destroy_arr_elements(data_, size_);
+        clear();
         delete_arr(data_);
+    }
+
+    void clear() {
+        destroy_arr_elements(data_, size_);
+        size_ = 0;
     }
 
     [[nodiscard]] size_t size() const noexcept { return size_; }
     [[nodiscard]] size_t capacity() const noexcept { return capacity_; }
     bool empty() const noexcept { return size_ == 0; }
 
-    T &operator[](size_t idx) { return data_[idx]; }
-    T &at(size_t idx) {
+    T& operator[](size_t idx) { return data_[idx]; }
+    T& at(size_t idx) {
         if (idx > size_) {
             throw std::out_of_range("Value accessed out of range!");
         }
@@ -41,25 +70,36 @@ public:
     }
 
 private:
-    T *data_;
+    T* data_;
     size_t size_;
     size_t capacity_;
 
-    T *raw_alloc_arr(size_t num_elements) {
-        T *arr = static_cast<T *>(::operator new[](num_elements * sizeof(T)));
+    T* raw_alloc_arr(size_t desired_capacity) {
+        T* arr =
+            static_cast<T*>(::operator new[](desired_capacity * sizeof(T)));
         return arr;
     }
-    void initialize_arr(T *arr, size_t num_elements, const T& val) {
-        for (size_t i = 0; i < num_elements; i++) {
+    void init_arr(T* arr, size_t count, const T& val) {
+        for (size_t i = 0; i < count; i++) {
             new (arr + i) T(val);
         }
     }
-    void destroy_arr_elements(T *arr, size_t num_elements) {
-        for (size_t i = 0; i < num_elements; i++) {
+    void copy_into_arr(T* dst, const T* src, size_t count) {
+        for (size_t i = 0; i < count; i++) {
+            new (dst + i) T(src[i]);
+        }
+    }
+    void move_into_arr(T* dst, T* src, size_t count) {
+        for (size_t i = 0; i < count; i++) {
+            new (dst + i) T(std::move(src[i]));
+        }
+    }
+    void destroy_arr_elements(T* arr, size_t count) {
+        for (size_t i = 0; i < count; i++) {
             arr[i].~T();
         }
     }
-    void delete_arr(T *arr) {
+    void delete_arr(T* arr) {
         ::operator delete[](arr);
         arr = nullptr;
     }

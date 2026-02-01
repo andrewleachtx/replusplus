@@ -11,12 +11,44 @@ TEST(VectorTests, CTAD) {
     EXPECT_EQ(v.size(), 1);
 }
 
-TEST(VectorTests, Smoke) {
+TEST(VectorTests, CopyAssign) {
     fun::vector<int> v = {1, 2, 3};
+    fun::vector<int> v2 = {10, 20};
+
+    v2 = v;
+
+    EXPECT_EQ(v2.size(), 3);
+    EXPECT_EQ(v2[0], 1);
+    EXPECT_EQ(v2[1], 2);
+    EXPECT_EQ(v2[2], 3);
+
     EXPECT_EQ(v.size(), 3);
-    EXPECT_EQ(v.capacity(), 3);
+    EXPECT_EQ(v[0], 1);
 }
- 
+
+TEST(VectorTests, CopyAssignSelf) {
+    fun::vector<int> v = {1, 2, 3};
+
+    v = v;
+
+    EXPECT_EQ(v.size(), 3);
+    EXPECT_EQ(v[0], 1);
+}
+
+TEST(VectorTests, CopyCtor) {
+    fun::vector<int> v = {1, 2, 3};
+    fun::vector<int> v2(v);
+
+    EXPECT_EQ(v2.size(), 3);
+    EXPECT_EQ(v2.capacity(), 3);
+    EXPECT_EQ(v2[0], 1);
+    EXPECT_EQ(v2[1], 2);
+    EXPECT_EQ(v2[2], 3);
+
+    EXPECT_EQ(v.size(), 3);
+    EXPECT_EQ(v[0], 1);
+}
+
 TEST(VectorTests, ElementAccess) {
     fun::vector<int> v = {1, 2, 3};
     EXPECT_EQ(v[0], 1);
