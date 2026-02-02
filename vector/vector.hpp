@@ -24,6 +24,15 @@ public:
         const T* list_arr = list.begin();
         copy_into_arr(data_, list_arr, size_);
     }
+    ~vector() {
+        clear();
+        delete_arr(data_);
+    }
+    vector(const vector& other)
+        : data_{}, size_{other.size_}, capacity_{other.capacity_} {
+        data_ = raw_alloc_arr(other.capacity_);
+        copy_into_arr(data_, other.data_, other.size_);
+    }
     vector& operator=(const vector& other) {
         if (this != &other) {
             // Deallocate the elements we have
@@ -43,10 +52,11 @@ public:
 
         return *this;
     }
-    vector(const vector& other)
-        : data_{}, size_{other.size_}, capacity_{other.capacity_} {
-        data_ = raw_alloc_arr(other.capacity_);
-        copy_into_arr(data_, other.data_, other.size_);
+    vector(vector&& other)
+        : data_{other.data_}, size_{other.size_}, capacity_{other.capacity_} {
+        other.data_ = nullptr;
+        other.size_ = 0;
+        other.capacity_ = 0;
     }
     vector& operator=(vector&& other) {
         if (this != &other) {
@@ -64,16 +74,6 @@ public:
         }
 
         return *this;
-    }
-    vector(vector&& other)
-        : data_{other.data_}, size_{other.size_}, capacity_{other.capacity_} {
-        other.data_ = nullptr;
-        other.size_ = 0;
-        other.capacity_ = 0;
-    }
-    ~vector() {
-        clear();
-        delete_arr(data_);
     }
 
     // TODO(A): can we make this strong exception safe (support rollback)?

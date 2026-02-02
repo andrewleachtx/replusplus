@@ -34,18 +34,51 @@ public:
         }
     }
     ~gpu_array() {
-        cudaTry(cudaFree(device_data_));
+        cudaFree(device_data_);
 
         if constexpr (DoPinnedTransfer) {
-            cudaTry(cudaFreeHost(host_data_));
+            cudaFreeHost(host_data_);
         }
         else {
             delete_arr(host_data_);
         }
     }
 
-    void to_device() {}
-    void to_host() {}
+    gpu_array(const gpu_array&) = delete;
+    gpu_array& operator=(const gpu_array&) = delete;
+    gpu_array(gpu_array&& other) noexcept
+        : host_data_{other.host_data_}, device_data_{other.device_data_} {
+        other.host_data_ = nullptr;
+        other.device_data_ = nullptr;
+    }
+    gpu_array& operator=(gpu_array&& other) noexcept {
+        if (this != &other) {
+            cudaTry(cudaFree(device_data_));
+            if constexpr (DoPinnedTransfer) {
+                cudaTry(cudaFreeHost(host_data_));
+            }
+            else {
+                delete_arr(host_data_);
+            }
+        }
+
+        host_data_ = other.host_data_;
+        device_data_ = other.device_data_;
+
+        other.host_data_ = nullptr;
+        other.device_data_ = nullptr;
+
+        return *this;
+    }
+
+    void to_device() {
+        cudaTry(cudaMemcpy(device_data_, host_data_, N * sizeof(T),
+                           cudaMemcpyHostToDevice));
+    }
+    void to_host() {
+        cudaTry(cudaMemcpy(host_data_, device_data_, N * sizeof(T),
+                           cudaMemcpyDeviceToHost));
+    }
 
     static constexpr size_t size() { return N; }
 
