@@ -2,10 +2,11 @@
 #include <initializer_list>
 #include <iostream>
 #include <new>
+#include <stdexcept>
 #include <utility>
 
 /*
-    Dynamically resizable vector with a few basic things
+    Dynamically resizable array. Doubles on grow, and uses placement new.
 */
 
 constexpr size_t GROWTH_FACTOR = 2;
@@ -56,7 +57,7 @@ public:
             data_ = other.data_;
             capacity_ = other.capacity_;
             size_ = other.size_;
-            
+
             other.data_ = nullptr;
             other.capacity_ = 0;
             other.size_ = 0;
@@ -119,8 +120,17 @@ public:
     bool empty() const noexcept { return size_ == 0; }
 
     T& operator[](size_t idx) { return data_[idx]; }
+    const T& operator[](size_t idx) const { return data_[idx]; }
+
     T& at(size_t idx) {
-        if (idx > size_) {
+        if (idx >= size_) {
+            throw std::out_of_range("Value accessed out of range!");
+        }
+
+        return data_[idx];
+    }
+    const T& at(size_t idx) const {
+        if (idx >= size_) {
             throw std::out_of_range("Value accessed out of range!");
         }
 
@@ -132,35 +142,32 @@ private:
     size_t size_;
     size_t capacity_;
 
-    T* raw_alloc_arr(size_t desired_capacity) {
+    static T* raw_alloc_arr(size_t desired_capacity) {
         T* arr =
             static_cast<T*>(::operator new[](desired_capacity * sizeof(T)));
         return arr;
     }
-    void init_arr(T* arr, size_t count, const T& val) {
+    static void init_arr(T* arr, size_t count, const T& val) {
         for (size_t i = 0; i < count; i++) {
             new (arr + i) T(val);
         }
     }
-    void copy_into_arr(T* dst, const T* src, size_t count) {
+    static void copy_into_arr(T* dst, const T* src, size_t count) {
         for (size_t i = 0; i < count; i++) {
             new (dst + i) T(src[i]);
         }
     }
-    void move_into_arr(T* dst, T* src, size_t count) {
+    static void move_into_arr(T* dst, T* src, size_t count) {
         for (size_t i = 0; i < count; i++) {
             new (dst + i) T(std::move(src[i]));
         }
     }
-    void destroy_arr_elements(T* arr, size_t count) {
+    static void destroy_arr_elements(T* arr, size_t count) {
         for (size_t i = 0; i < count; i++) {
             arr[i].~T();
         }
     }
-    void delete_arr(T* arr) {
-        ::operator delete[](arr);
-        arr = nullptr;
-    }
+    static void delete_arr(T* arr) { ::operator delete[](arr); }
 };
 
 template <typename T> vector(std::initializer_list<T>) -> vector<T>;

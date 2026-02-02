@@ -5,7 +5,7 @@ target_include_directories(gpu_array
 add_executable(gpu_array_tests gpu_array.cu)
 
 target_link_libraries(gpu_array_tests PRIVATE
-    gpu_array gtest gtest_main
+    gpu_array common gtest gtest_main
 )
 # target_compile_options(gpu_array_tests PRIVATE
 #     $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra>
