@@ -101,6 +101,8 @@ public:
     T* device_ptr() const { return device_data_; }
 
 private:
+    // TODO(A): We could add a compile-time debug tracker for last
+    // update location to avoid sync issues
     T* host_data_;
     T* device_data_;
 
