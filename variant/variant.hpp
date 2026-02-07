@@ -12,9 +12,9 @@ template <typename... Types> class variant {
 public:
     variant() {}
 
-    template <size_t I, Type> constexpr get() {
-        goal
-    }
+    // template <size_t I, Type> constexpr get() {
+    //     // goal
+    // }
 
 private:
     // {sizeof(Types)...} expands to {sizeof(int), sizeof(double), sizeof(std::string)}
@@ -45,17 +45,17 @@ template <typename TargetType, typename... Types> constexpr size_t index_of() {
         std::is_same_v gets checked against all types
     */
     ((std::is_same_v<TargetType, Types>
-          ? (is_found ? void() : (is_found = true, result = idx), void())
+          ? (is_found ? void() : (is_found = true, result_idx = idx), void())
           : void(),
       idx++),
      ...);
 
-    if (!is_found) {
-        static_assert(std::dependent_false_v<T>,
-                      "index_of<T, Types...>: T not found in Types...");
-    }
+    // if (!is_found) {
+    //     static_assert(std::dependent_false_v<T>,
+    //                   "index_of<T, Types...>: T not found in Types...");
+    // }
 
-    return result;
+    return result_idx;
 }
 
 }; // namespace fun
