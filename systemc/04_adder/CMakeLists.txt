@@ -1,0 +1,1 @@
+add_systemc_exercise(04_adder)
