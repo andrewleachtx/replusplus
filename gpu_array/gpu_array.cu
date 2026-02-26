@@ -2,11 +2,11 @@
 #include <gtest/gtest.h>
 
 TEST(GpuArrayPageable, Ctor) {
-    fun::gpu_array<float, 10> arr;
+    fun::gpu_array<float> arr(10);
     EXPECT_EQ(arr.size(), 10);
 }
 TEST(GpuArrayPageable, Access) {
-    fun::gpu_array<float, 10> arr;
+    fun::gpu_array<float> arr(10);
     EXPECT_EQ(arr.size(), 10);
     for (size_t i = 0; i < arr.size(); i++) {
         arr[i] = 1.0f * i;
@@ -17,12 +17,12 @@ TEST(GpuArrayPageable, Access) {
 }
 
 TEST(GpuArrayPinned, Ctor) {
-    fun::gpu_array<float, 10, true> arr;
+    fun::gpu_array<float, true> arr(10);
     EXPECT_EQ(arr.size(), 10);
 }
 
 TEST(GpuArrayPinned, Access) {
-    fun::gpu_array<float, 10, true> arr;
+    fun::gpu_array<float, true> arr(10);
     for (size_t i = 0; i < arr.size(); i++) {
         arr[i] = 2.0f * i;
     }
@@ -32,7 +32,7 @@ TEST(GpuArrayPinned, Access) {
 }
 
 TEST(GpuArrayPageable, BoundsCheck) {
-    fun::gpu_array<int, 5> arr;
+    fun::gpu_array<int> arr(5);
     EXPECT_NO_THROW(arr.at(0));
     EXPECT_NO_THROW(arr.at(4));
     EXPECT_THROW(arr.at(5), std::out_of_range);
@@ -40,7 +40,7 @@ TEST(GpuArrayPageable, BoundsCheck) {
 }
 
 TEST(GpuArrayPinned, BoundsCheck) {
-    fun::gpu_array<int, 5, true> arr;
+    fun::gpu_array<int, true> arr(5);
     EXPECT_NO_THROW(arr.at(0));
     EXPECT_NO_THROW(arr.at(4));
     EXPECT_THROW(arr.at(5), std::out_of_range);
@@ -48,7 +48,7 @@ TEST(GpuArrayPinned, BoundsCheck) {
 }
 
 TEST(GpuArrayPageable, TransferRoundTrip) {
-    fun::gpu_array<float, 100> arr;
+    fun::gpu_array<float> arr(100);
 
     // Fill with known pattern
     for (size_t i = 0; i < arr.size(); i++) {
@@ -66,7 +66,7 @@ TEST(GpuArrayPageable, TransferRoundTrip) {
 }
 
 TEST(GpuArrayPinned, TransferRoundTrip) {
-    fun::gpu_array<float, 100, true> arr;
+    fun::gpu_array<float, true> arr(100);
 
     // Fill with known pattern
     for (size_t i = 0; i < arr.size(); i++) {
@@ -84,7 +84,7 @@ TEST(GpuArrayPinned, TransferRoundTrip) {
 }
 
 TEST(GpuArrayTests, MoveSemantics) {
-    fun::gpu_array<int, 10> arr;
+    fun::gpu_array<int> arr(10);
 
     // Fill original
     for (size_t i = 0; i < arr.size(); i++) {
@@ -92,7 +92,7 @@ TEST(GpuArrayTests, MoveSemantics) {
     }
 
     // Move construct
-    fun::gpu_array<int, 10> arr2(std::move(arr));
+    fun::gpu_array<int> arr2(std::move(arr));
 
     // Verify new array has data
     EXPECT_EQ(arr2.size(), 10);
@@ -102,6 +102,27 @@ TEST(GpuArrayTests, MoveSemantics) {
 
     // Original should have nulled pointers (can't easily test this from outside)
     // But destructor shouldn't crash
+}
+
+TEST(GpuArrayTests, MoveConstructorZerosSource) {
+    fun::gpu_array<int> arr(10);
+    fun::gpu_array<int> arr2(std::move(arr));
+
+    EXPECT_EQ(arr.size(), 0);
+}
+
+TEST(GpuArrayTests, SelfMoveAssignment) {
+    fun::gpu_array<int> arr(10);
+    for (size_t i = 0; i < arr.size(); i++) {
+        arr[i] = static_cast<int>(i);
+    }
+
+    arr = std::move(arr);
+
+    EXPECT_EQ(arr.size(), 10);
+    for (size_t i = 0; i < arr.size(); i++) {
+        EXPECT_EQ(arr[i], static_cast<int>(i));
+    }
 }
 
 __global__ void double_kernel(float* data, size_t n) {
@@ -114,7 +135,7 @@ __global__ void double_kernel(float* data, size_t n) {
 }
 
 TEST(GpuArrayTests, KernelExecution) {
-    fun::gpu_array<float, 1024> arr;
+    fun::gpu_array<float> arr(1024);
     for (size_t i = 0; i < arr.size(); i++) {
         arr[i] = static_cast<float>(i);
     }
