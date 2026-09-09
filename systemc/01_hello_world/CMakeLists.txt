@@ -1,1 +1,0 @@
-add_systemc_exercise(01_hello_world)
