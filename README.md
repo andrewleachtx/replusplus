@@ -1,5 +1,7 @@
 # replusplus
-Reimplementing C++ STL containers and whatever else is fun.
+Reimplementing C++ STL containers for learning sake.
+
+Working on an overhaul in [roadmap.md](./roadmap.md).
 
 ## Structure
 ```
@@ -21,5 +23,3 @@ replusplus/
 There is a folder per target or structure with its own implementation (in-header, so `xyz.hpp`) and tests (`xyz.cpp`).
 
 Basically, the top level `CMakeLists.txt` can be used to pick targets for tests, and then each target has its own `CMakeLists.txt` as a subdirectory.
-
-TODO(A): Probably need a way to export libs later
