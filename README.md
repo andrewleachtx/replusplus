@@ -3,23 +3,26 @@ Reimplementing C++ STL containers for learning sake.
 
 Working on an overhaul in [roadmap.md](./roadmap.md).
 
-## Structure
-```
-replusplus/
-├── README.md
-├── CMakeLists.txt
-├── vendor/
-│   └── googletest/
-├── vector/
-│   ├── CMakeLists.txt
-│   ├── vector.hpp
-│   └── vector.cpp
-└── optional/
-    ├── CMakeLists.txt
-    ├── optional.hpp
-    └── optional.cpp
+## build/usage
+
+replusplus is currently a header only C++20 library.
+
+Configure and build:
+
+```sh
+cmake -S . -B build
+cmake --build build
 ```
 
-There is a folder per target or structure with its own implementation (in-header, so `xyz.hpp`) and tests (`xyz.cpp`).
+Run tests:
 
-Basically, the top level `CMakeLists.txt` can be used to pick targets for tests, and then each target has its own `CMakeLists.txt` as a subdirectory.
+```sh
+ctest --test-dir build --output-on-failure
+```
+
+Public headers are included through the `replusplus/` namespace (see `tests/` for examples)
+
+```c++
+#include <replusplus/vector.hpp>
+#include <replusplus/optional.hpp>
+```

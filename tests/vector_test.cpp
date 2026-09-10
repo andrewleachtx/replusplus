@@ -1,4 +1,4 @@
-#include "vector.hpp"
+#include <replusplus/vector.hpp>
 #include <gtest/gtest.h>
 
 TEST(VectorTests, Ctor) {
