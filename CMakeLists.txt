@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.29)
 project(replusplus LANGUAGES CXX)
 
+# For clangd
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Extend replusplus as a library, interface means other targets depend on it, but CMake
 # doesn't compile source files for it during the downstream build process
 add_library(replusplus INTERFACE)
