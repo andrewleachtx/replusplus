@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <cstddef>
 
-namespace fun {
+namespace replusplus {
 
 template <typename... Types> class variant {
 public:
@@ -58,4 +58,4 @@ template <typename TargetType, typename... Types> constexpr size_t index_of() {
     return result_idx;
 }
 
-}; // namespace fun
+}; // namespace replusplus

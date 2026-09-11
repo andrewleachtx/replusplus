@@ -20,6 +20,12 @@ Run tests:
 ctest --test-dir build --output-on-failure
 ```
 
+or optionally through build. You can also pass a filter to typeo f test.
+
+```sh
+./build/replusplus_tests --gtest_filter='AllocatorTest.*'
+```
+
 Public headers are included through the `replusplus/` namespace (see `tests/` for examples)
 
 ```c++

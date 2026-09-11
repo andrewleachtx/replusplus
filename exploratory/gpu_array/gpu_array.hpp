@@ -15,7 +15,7 @@
     Also, this (can) support pinned host memory for faster DMA transfer:
     https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/
 */
-namespace fun {
+namespace replusplus {
 // TODO(A): should we use pinnedmemory true by default?
 // TODO(A): should i make replusplus choose the next multiple of 2 i.e. 2^(ceil(log2(n)))
 template <typename T, bool DoPinnedTransfer = false> class gpu_array {
@@ -132,4 +132,4 @@ template <typename... Arrays> void to_host_all(Arrays&... arrays) {
     (arrays.to_host(), ...);
 }
 
-}; // namespace fun
+}; // namespace replusplus

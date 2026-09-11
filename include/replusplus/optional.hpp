@@ -2,12 +2,12 @@
 #include <utility>
 
 /*
-    fun::optional<Dog> dog;
+    replusplus::optional<Dog> dog;
         -> has_value_ should be false
         -> the obj_ technically will be initialized, which is bad but 
            room for improvement
 */
-namespace fun {
+namespace replusplus {
 template <typename T> class optional {
 public:
     optional() : obj_{}, has_value_{false} {}
@@ -54,4 +54,4 @@ private:
     T obj_;
     bool has_value_;
 };
-}; // namespace fun
+}; // namespace replusplus
