@@ -1,7 +1,6 @@
 #include <replusplus/allocator.hpp>
 #include <gtest/gtest.h>
 #include <memory>
-#include <stdexcept>
 
 struct Tracker {
     int value_;
