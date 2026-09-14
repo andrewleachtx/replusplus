@@ -1,3 +1,4 @@
+#include <initializer_list>
 #include <stdexcept>
 #include <string>
 
@@ -49,6 +50,20 @@ public:
 
     // Constructors
     vector() : data_{nullptr}, size_{0}, capacity_{0} {}
+    vector(std::initializer_list<T> ilist)
+        : data_{nullptr}, size_{0}, capacity_{0} {
+        if (ilist.size() == 0) {
+            return;
+        }
+
+        data_ = allocator_traits::allocate(alloc_, ilist.size());
+        capacity_ = ilist.size();
+
+        for (const auto& v : ilist) {
+            allocator_traits::construct(alloc_, data_ + size_, v);
+            size_++;
+        }
+    }
 
     vector(const vector& other)
         : data_{nullptr}, size_{0}, capacity_{0},
@@ -149,30 +164,98 @@ public:
         }
         else {
             // Construct at the last slot so later shifts can place there
-            allocator_traits::construct(alloc_, data_ + size_, std::move_if_noexcept(data_[size_ - 1]));
+            allocator_traits::construct(
+                alloc_, data_ + size_, std::move_if_noexcept(data_[size_ - 1]));
 
             // Shift all elements starting at pos over to the right by one (work right to left)
             for (std::size_t i = size_ - 1; i > index; i--) {
                 // Move i-1 into i
                 data_[i] = std::move(data_[i - 1]);
             }
-            
+
             data_[index] = value;
         }
 
         size_++;
         return data_ + index;
     }
-    iterator insert(const_iterator pos, T&& value) {}
+    iterator insert(const_iterator pos, T&& value) {
+        // nullptr - nullptr is UB
+        std::size_t index = (pos == cbegin()) ? 0 : (pos - cbegin());
 
-    // TODO iterator erase https://en.cppreference.com/cpp/container/vector/erase
+        // If incrementing once would exceed our capacity, we must resize which can invalidate our pos
+        if (size_ == capacity_) {
+            reallocateTo((capacity_ == 0) ? 1 : capacity_ * GROWTH_FACTOR);
+        }
 
-    void push_back(const T& value) {}
-    void push_back(T&& value) {}
+        // If we try to insert at end() or the vector is empty we don't need to shift
+        if (index == size_) {
+            allocator_traits::construct(alloc_, data_ + size_,
+                                        std::move(value));
+        }
+        else {
+            // Construct at the last slot so later shifts can place there
+            allocator_traits::construct(
+                alloc_, data_ + size_, std::move_if_noexcept(data_[size_ - 1]));
 
-    void pop_back() {}
-    void pop_front() {}
-    void pop(std::size_t index) {}
+            // Shift all elements starting at pos over to the right by one (work right to left)
+            for (std::size_t i = size_ - 1; i > index; i--) {
+                // Move i-1 into i
+                data_[i] = std::move(data_[i - 1]);
+            }
+
+            data_[index] = std::move(value);
+        }
+
+        size_++;
+        return data_ + index;
+    }
+
+    iterator erase(const_iterator pos) { return erase(pos, pos + 1); }
+    iterator erase(const_iterator first, const_iterator last) {
+        // Erasing an empty range is a no-op
+        if (first == last) {
+            if (first == cbegin()) {
+                return begin();
+            }
+
+            const std::size_t idx = static_cast<std::size_t>(first - cbegin());
+
+            return data_ + idx;
+        }
+
+        std::size_t idx = static_cast<std::size_t>(first - cbegin());
+        const std::size_t erase_ct = static_cast<std::size_t>(last - first);
+
+        // Shift erase_ct elements over
+        for (std::size_t i = idx; i + erase_ct < size_; i++) {
+            data_[i] = std::move(data_[i + erase_ct]);
+        }
+
+        for (std::size_t i = size_ - erase_ct; i < size_; i++) {
+            // Destroy where we moved from
+            allocator_traits::destroy(alloc_, data_ + i);
+        }
+
+        size_ -= erase_ct;
+        return data_ + idx;
+    }
+
+    void push_back(const T& value) { insert(cend(), value); }
+    void push_back(T&& value) { insert(cend(), std::move(value)); }
+
+    void pop_back() {
+        assert(!empty() && "pop_back called on an empty vector!");
+        erase(cend());
+    }
+    void pop_front() {
+        assert(!empty() && "pop_front called on an empty vector!");
+        erase(cbegin());
+    }
+    void pop(std::size_t index) {
+        assert(index < size_ && "pop called with an out-of-bounds index!");
+        erase(cbegin() + index);
+    }
 
     void resize(std::size_t desired_count) {}
     void swap(vector& other) {}

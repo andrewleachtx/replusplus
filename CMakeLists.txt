@@ -32,7 +32,7 @@ add_subdirectory(vendor/googletest)
 # Make one executable that builds all .cpp tests in tests/
 add_executable(
     replusplus_tests
-    # tests/vector_tests.cpp
+    tests/vector_tests.cpp
     tests/optional_tests.cpp
     tests/variant_tests.cpp
     tests/allocator_tests.cpp
