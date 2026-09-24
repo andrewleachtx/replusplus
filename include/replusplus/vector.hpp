@@ -138,8 +138,12 @@ public:
     bool empty() const noexcept { return size_ == 0; }
     std::size_t size() const noexcept { return size_; }
     std::size_t capacity() const noexcept { return capacity_; }
-    void reserve(std::size_t desired_capacity);
-    void shrink_to_fit();
+    void reserve(std::size_t desired_capacity) {
+        reallocateTo(desired_capacity);
+    }
+    void shrink_to_fit() {
+        reallocateTo(size_);
+    }
 
     // Modifiers
     void clear() {
@@ -246,7 +250,7 @@ public:
 
     void pop_back() {
         assert(!empty() && "pop_back called on an empty vector!");
-        erase(cend());
+        erase(cend() - 1);
     }
     void pop_front() {
         assert(!empty() && "pop_front called on an empty vector!");
@@ -257,7 +261,35 @@ public:
         erase(cbegin() + index);
     }
 
-    void resize(std::size_t desired_count) {}
+    void resize(std::size_t desired_size) {
+        // Call resize(count, value) with T()
+        resize(desired_size, T());
+    }
+    // Does nothing if count == size(), if size() > count, reduce to first count elements, if size() < count add value for each new val
+    void resize(std::size_t desired_size, const T& value) {
+        // Might as well set it to the exact desired_size
+        if (desired_size > capacity_) {
+            reallocateTo(desired_size);
+        }
+
+        if (size_ == desired_size) {
+            return;
+        }
+        else if (size_ > desired_size) {
+            // {1, 2, 3, 4, 5} -> resize(3) => start at idx=desired_size and walk to size_ - 1, destroying
+            for (std::size_t i = desired_size; i < size_; i++) {
+                allocator_traits::destroy(alloc_, data_ + i);
+            }
+        }
+        else {
+            // {1, 2, 3} -> resize(5, 67) => start at idx=size_ and walk forward until i = desired_size - 1
+            for (std::size_t i = size_; i < desired_size; i++) {
+                allocator_traits::construct(alloc_, data_ + i, value);
+            }
+        }
+
+        size_ = desired_size;
+    }
     void swap(vector& other) {}
 
     // operator<=>

@@ -36,6 +36,7 @@ add_executable(
     tests/optional_tests.cpp
     tests/variant_tests.cpp
     tests/allocator_tests.cpp
+    tests/cowstring_tests.cpp
 )
 
 # This executable doesn't know anything about replusplus or GoogleTest yet - so make it depend on both targets

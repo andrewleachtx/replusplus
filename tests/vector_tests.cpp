@@ -117,3 +117,20 @@ TEST(VectorTests, PushBackMove) {
     // s was moved from — should be empty
     EXPECT_TRUE(s.empty());
 }
+
+TEST(VectorTests, Resize) {
+    replusplus::vector<int> v;
+
+    v.resize(67);
+    EXPECT_EQ(v.size(), 67);
+
+    for (auto it = v.begin(); it != v.end(); it++) {
+        EXPECT_EQ(*it, 0);
+    }
+
+    v.resize(3, 67);
+
+    for (auto it = v.begin(); it != v.end(); it++) {
+        EXPECT_EQ(*it, 67);
+    }
+}
