@@ -4,7 +4,6 @@
 #include <queue>
 #include <thread>
 
-
 namespace replusplus {
 class WorkQueue {
 public:
@@ -18,7 +17,13 @@ public:
         }
     }
     ~WorkQueue() {
-        is_destroying_ = true;
+        {
+            std::scoped_lock lock(mutex_);
+            is_destroying_ = true;
+        }
+
+        cv_.notify_all();
+
         for (auto& thr : consumers_) {
             thr.join();
         }
@@ -41,11 +46,18 @@ private:
 
     void pop() {
         // Threads should spin in here waiting to take on a new job.
-        while (!is_destroying_) {
+        while (true) {
             std::unique_lock lock(mutex_);
 
             // Condition variables signal the thread to wake up when the predicate becomes true
-            cv_.wait(lock, [this]() { return !waiting_jobs_.empty(); });
+            cv_.wait(lock, [this]() {
+                return !waiting_jobs_.empty() || is_destroying_;
+            });
+            
+            // If we woke up due to a destroy call, we should not try to pop from our queue - instead 
+            // break out and exit pop() scope to be joined in dtor.
+            if (is_destroying_ && waiting_jobs_.empty())
+                break;
 
             // Critical section
             Job job = waiting_jobs_.front();
