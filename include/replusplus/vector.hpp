@@ -1,10 +1,11 @@
+#include <replusplus/allocator.hpp>
+
+#include <algorithm>
+#include <cassert>
 #include <initializer_list>
+#include <memory>
 #include <stdexcept>
 #include <string>
-
-#include <cassert>
-#include <memory>
-#include <replusplus/allocator.hpp>
 #include <utility>
 
 #pragma once
@@ -141,9 +142,7 @@ public:
     void reserve(std::size_t desired_capacity) {
         reallocateTo(desired_capacity);
     }
-    void shrink_to_fit() {
-        reallocateTo(size_);
-    }
+    void shrink_to_fit() { reallocateTo(size_); }
 
     // Modifiers
     void clear() {
@@ -291,6 +290,60 @@ public:
         size_ = desired_size;
     }
     void swap(vector& other) {}
+
+    bool operator==(const vector& other) const {
+        if (size_ == other.size_) {
+            for (std::size_t i = 0; i < size_; i++) {
+                if (data_[i] != other[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+    bool operator!=(const vector& other) const { return !(*this == other); }
+    bool operator<(const vector& other) const {
+        for (std::size_t i = 0; i < std::min(size_, other.size_); i++) {
+            if (data_[i] < other[i])
+                return true;
+            if (data_[i] > other[i])
+                return false;
+        }
+
+        return size_ < other.size_;
+    }
+    bool operator>(const vector& other) const {
+        for (std::size_t i = 0; i < std::min(size_, other.size_); i++) {
+            if (data_[i] < other[i])
+                return false;
+            if (data_[i] > other[i])
+                return true;
+        }
+
+        return size_ > other.size_;
+    }
+    bool operator<=(const vector& other) const {
+        for (std::size_t i = 0; i < std::min(size_, other.size_); i++) {
+            if (data_[i] < other[i])
+                return true;
+            if (data_[i] > other[i])
+                return false;
+        }
+
+        return size_ <= other.size_;
+    }
+    bool operator>=(const vector& other) const {
+        for (std::size_t i = 0; i < std::min(size_, other.size_); i++) {
+            if (data_[i] < other[i])
+                return false;
+            if (data_[i] > other[i])
+                return true;
+        }
+
+        return size_ >= other.size_;
+    }
 
     // operator<=>
 
