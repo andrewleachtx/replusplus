@@ -4,11 +4,12 @@
 #include <queue>
 #include <thread>
 
-using Job = std::function<void()>;
 
 namespace replusplus {
 class WorkQueue {
 public:
+    using Job = std::function<void()>;
+
     explicit WorkQueue(const std::size_t width) {
         consumers_.reserve(width);
         // TODO is there a way to default construct this properly? or resize?
