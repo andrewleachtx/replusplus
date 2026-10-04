@@ -1,3 +1,4 @@
+#include <compare>
 #include <replusplus/allocator.hpp>
 
 #include <algorithm>
@@ -303,49 +304,22 @@ public:
 
         return false;
     }
-    bool operator!=(const vector& other) const { return !(*this == other); }
-    bool operator<(const vector& other) const {
+
+    // in C++20+ we do not have to write bool operator!=, the compiler generates it as !(a==b) assuming a==b is well defined.
+    // operator<=> with strong ordering, as we always have an unambiguous answer to vec1 <=> vec2.
+    std::strong_ordering operator<=>(const vector& other) const {
         for (std::size_t i = 0; i < std::min(size_, other.size_); i++) {
             if (data_[i] < other[i])
-                return true;
+                return std::strong_ordering::less;
             if (data_[i] > other[i])
-                return false;
+                return std::strong_ordering::greater;
         }
 
-        return size_ < other.size_;
+        // At this point (we haven't returned), if the sizes are the same we must be equal.
+        // Otherwise, we can have two cases. {1, 2} < {1, 2, 3} OR {1, 2} < {1, 2, 3}. First is lt, second is gt.
+        // We can use the spaceship operator for std::size_t to clean this up in one pass!
+        return size_ <=> other.size_;
     }
-    bool operator>(const vector& other) const {
-        for (std::size_t i = 0; i < std::min(size_, other.size_); i++) {
-            if (data_[i] < other[i])
-                return false;
-            if (data_[i] > other[i])
-                return true;
-        }
-
-        return size_ > other.size_;
-    }
-    bool operator<=(const vector& other) const {
-        for (std::size_t i = 0; i < std::min(size_, other.size_); i++) {
-            if (data_[i] < other[i])
-                return true;
-            if (data_[i] > other[i])
-                return false;
-        }
-
-        return size_ <= other.size_;
-    }
-    bool operator>=(const vector& other) const {
-        for (std::size_t i = 0; i < std::min(size_, other.size_); i++) {
-            if (data_[i] < other[i])
-                return false;
-            if (data_[i] > other[i])
-                return true;
-        }
-
-        return size_ >= other.size_;
-    }
-
-    // operator<=>
 
 private:
     static constexpr std::size_t GROWTH_FACTOR = 2;

@@ -1,3 +1,4 @@
+#include <numeric>
 #include <replusplus/vector.hpp>
 #include <gtest/gtest.h>
 
@@ -118,19 +119,94 @@ TEST(VectorTests, PushBackMove) {
     EXPECT_TRUE(s.empty());
 }
 
-TEST(VectorTests, Resize) {
+TEST(VectorTests, ResizeGrowsWithDefaultValues) {
     replusplus::vector<int> v;
 
-    v.resize(67);
-    EXPECT_EQ(v.size(), 67);
+    v.resize(5);
 
-    for (auto it = v.begin(); it != v.end(); it++) {
-        EXPECT_EQ(*it, 0);
+    ASSERT_EQ(v.size(), 5);
+    EXPECT_GE(v.capacity(), 5);
+
+    for (const int value : v) {
+        EXPECT_EQ(value, 0);
     }
+}
+
+TEST(VectorTests, ResizeGrowsWithProvidedValue) {
+    replusplus::vector<int> v = {1, 2, 3};
+
+    v.resize(6, 67);
+
+    ASSERT_EQ(v.size(), 6);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[1], 2);
+    EXPECT_EQ(v[2], 3);
+    EXPECT_EQ(v[3], 67);
+    EXPECT_EQ(v[4], 67);
+    EXPECT_EQ(v[5], 67);
+}
+
+TEST(VectorTests, ResizeShrinksWithoutChangingSurvivors) {
+    replusplus::vector<int> v = {1, 2, 3, 4, 5};
+    const auto old_capacity = v.capacity();
 
     v.resize(3, 67);
 
-    for (auto it = v.begin(); it != v.end(); it++) {
-        EXPECT_EQ(*it, 67);
-    }
+    ASSERT_EQ(v.size(), 3);
+    EXPECT_EQ(v.capacity(), old_capacity);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[1], 2);
+    EXPECT_EQ(v[2], 3);
+}
+
+TEST(VectorTests, ResizeToSameSizeDoesNothing) {
+    replusplus::vector<int> v = {1, 2, 3};
+    const auto old_capacity = v.capacity();
+    const auto old_data = v.data();
+
+    v.resize(3, 67);
+
+    EXPECT_EQ(v.size(), 3);
+    EXPECT_EQ(v.capacity(), old_capacity);
+    EXPECT_EQ(v.data(), old_data);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[1], 2);
+    EXPECT_EQ(v[2], 3);
+}
+
+TEST(VectorTests, ResizeToZero) {
+    replusplus::vector<int> v = {1, 2, 3};
+    const auto old_capacity = v.capacity();
+
+    v.resize(0);
+
+    EXPECT_TRUE(v.empty());
+    EXPECT_EQ(v.capacity(), old_capacity);
+}
+
+TEST(VectorTests, Comparison) {
+    replusplus::vector<int> a, b;
+
+    EXPECT_EQ(a, b);
+
+    a.resize(3, -1);
+    EXPECT_NE(a, b);
+
+    b.resize(3, -1);
+    EXPECT_EQ(a, b);
+
+    a[0] = 0;
+    EXPECT_NE(a, b);
+
+    // {1, 2, 3} should be lte, gte {1, 2, 3}
+    std::iota(a.begin(), a.end(), 1);
+    std::iota(b.begin(), b.end(), 1);
+    
+    EXPECT_LE(a, b);
+    EXPECT_GE(a, b);
+
+    // and {1, 2} should be lt {1, 2, 3} and {1, 2, 3} gt {1, 2}.
+    a.resize(2);
+    EXPECT_LT(a, b);
+    EXPECT_GT(b, a);
 }
