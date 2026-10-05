@@ -1,5 +1,5 @@
-#include <replusplus/optional.hpp>
 #include <gtest/gtest.h>
+#include <replusplus/optional.hpp>
 #include <stdexcept>
 #include <string>
 

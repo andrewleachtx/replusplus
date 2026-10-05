@@ -8,7 +8,7 @@ public:
     mutex& operator=(mutex&&) = delete;
     mutex(const mutex&) = delete;
     mutex(mutex&&) = delete;
-    
+
     /*
         atomic.compare_exchange_strong(T& expected, T desired) {
             if atomic == expected:
@@ -30,11 +30,9 @@ public:
             expected = false;
         }
     }
-    void unlock() {
-        is_locked_.store(false);
-    }
+    void unlock() { is_locked_.store(false); }
 
 private:
-    std::atomic<bool> is_locked_ { false };
+    std::atomic<bool> is_locked_{false};
 };
 } // namespace replusplus

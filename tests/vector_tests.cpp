@@ -1,6 +1,6 @@
+#include <gtest/gtest.h>
 #include <numeric>
 #include <replusplus/vector.hpp>
-#include <gtest/gtest.h>
 
 TEST(VectorTests, Ctor) {
     replusplus::vector<int> v;
@@ -201,7 +201,7 @@ TEST(VectorTests, Comparison) {
     // {1, 2, 3} should be lte, gte {1, 2, 3}
     std::iota(a.begin(), a.end(), 1);
     std::iota(b.begin(), b.end(), 1);
-    
+
     EXPECT_LE(a, b);
     EXPECT_GE(a, b);
 

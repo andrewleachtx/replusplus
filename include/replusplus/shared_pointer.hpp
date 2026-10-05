@@ -20,9 +20,7 @@ public:
     shared_ptr& operator=(shared_ptr&&) = delete;
     shared_ptr(shared_ptr&&) = delete;
 
-    T* get() {
-        return data_;
-    }
+    T* get() { return data_; }
     T& operator*() const noexcept { return *data_; }
     T* operator->() const noexcept { return data_; }
 

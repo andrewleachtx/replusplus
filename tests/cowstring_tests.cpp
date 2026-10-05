@@ -1,12 +1,10 @@
-#include <replusplus/cowstring.hpp>
 #include <gtest/gtest.h>
+#include <replusplus/cowstring.hpp>
 
-TEST(COWStringTests, DefaultCtor) {
-    replusplus::COWString a {};
-}
+TEST(COWStringTests, DefaultCtor) { replusplus::COWString a{}; }
 
 TEST(COWStringTests, CStrCtor) {
-    replusplus::COWString a {"hello world!"};
+    replusplus::COWString a{"hello world!"};
 
     for (std::size_t i = 0; i < a.size(); i++) {
         printf("%c", a[i]);
@@ -21,5 +19,4 @@ TEST(COWStringTests, CStrCtor) {
 //         replusplus::COWString a {"hi world!"};
 //     }
 
-    
 // }

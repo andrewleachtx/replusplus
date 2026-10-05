@@ -1,10 +1,10 @@
+#include <cstddef>
 #include <cstring>
 #include <string.h>
-#include <cstddef>
 
 namespace replusplus {
 struct ControlBlock {
-    std::size_t ref_ct_ {1};
+    std::size_t ref_ct_{1};
 };
 
 // TODO: Account for resize
@@ -31,7 +31,7 @@ public:
 
         strncpy(cstr_, c, size_);
 
-        ctrl_blk_ = new ControlBlock {};
+        ctrl_blk_ = new ControlBlock{};
     }
 
     COWString(const COWString& other) {
@@ -42,9 +42,7 @@ public:
         ctrl_blk_->ref_ct_++;
     }
 
-    char operator[](std::size_t idx) const {
-        return cstr_[idx];
-    }
+    char operator[](std::size_t idx) const { return cstr_[idx]; }
     char& operator[](std::size_t idx) {
         // On edit generate new string and work on that
         // UNLESS we are the only unique viewer
@@ -60,7 +58,7 @@ public:
 
         strncpy(new_cstr_, cstr_, size_);
 
-        ctrl_blk_ = new ControlBlock {};
+        ctrl_blk_ = new ControlBlock{};
 
         return cstr_[idx];
     }
@@ -69,11 +67,13 @@ public:
     std::size_t size() const { return size_; }
 
 private:
-    char* cstr_ {};
-    std::size_t size_ {};
+    char* cstr_{};
+    std::size_t size_{};
 
-    bool is_only_viewer() const { return ctrl_blk_ && ctrl_blk_->ref_ct_ == 1; };
+    bool is_only_viewer() const {
+        return ctrl_blk_ && ctrl_blk_->ref_ct_ == 1;
+    };
 
-    ControlBlock* ctrl_blk_ {};
+    ControlBlock* ctrl_blk_{};
 };
 } // namespace replusplus

@@ -1,6 +1,6 @@
-#include <replusplus/allocator.hpp>
 #include <gtest/gtest.h>
 #include <memory>
+#include <replusplus/allocator.hpp>
 
 struct Tracker {
     int value_;
@@ -10,13 +10,9 @@ struct Tracker {
     static inline int constructions = 0;
     static inline int destructions = 0;
 
-    explicit Tracker(int value) : value_{value} {
-        constructions++;
-    }
+    explicit Tracker(int value) : value_{value} { constructions++; }
 
-    ~Tracker() {
-        destructions++;
-    }
+    ~Tracker() { destructions++; }
 };
 
 TEST(AllocatorTest, AllocateAndDeallocate) {

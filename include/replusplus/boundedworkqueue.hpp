@@ -53,8 +53,8 @@ private:
             cv_.wait(lock, [this]() {
                 return !waiting_jobs_.empty() || is_destroying_;
             });
-            
-            // If we woke up due to a destroy call, we should not try to pop from our queue - instead 
+
+            // If we woke up due to a destroy call, we should not try to pop from our queue - instead
             // break out and exit pop() scope to be joined in dtor.
             if (is_destroying_ && waiting_jobs_.empty())
                 break;

@@ -1,10 +1,10 @@
 // TODO v
 // #include <replusplus/deque.hpp>
-#include <deque>
 #include <cstddef>
+#include <deque>
 
 namespace replusplus {
-template<typename T>
+template <typename T>
 // todo can we add a concept here for is container type? what apis do we require
 class queue {
     queue() {}
@@ -20,18 +20,14 @@ class queue {
 
     void push() {}
     void pop() {}
-    
+
     // Return the guy in the front of the line
-    T& front() {
-        return data_.front();
-    }
-    T& back() {
-        return data_.back();
-    }
+    T& front() { return data_.front(); }
+    T& back() { return data_.back(); }
+
 private:
     // replusplus::deque<T> data_;
     std::deque<T> data_;
 };
-
 
 } // namespace replusplus

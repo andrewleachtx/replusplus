@@ -1,7 +1,6 @@
-#include <replusplus/condition_variable.hpp>
 #include <gtest/gtest.h>
+#include <replusplus/condition_variable.hpp>
 
-#include <chrono>
 #include <cstddef>
 #include <future>
 #include <mutex>

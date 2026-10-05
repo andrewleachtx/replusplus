@@ -1,6 +1,6 @@
-#include <atomic>
 #include <replusplus/mutex.hpp>
 
+#include <atomic>
 #include <mutex>
 #include <thread>
 
@@ -27,14 +27,14 @@ public:
 
     void wait(std::unique_lock<std::mutex>& lock) {
         std::uint64_t initial_ct = generation_.load(std::memory_order_acquire);
-        
+
         // Relinquish the lock only after grabbing the atomic
         lock.unlock();
-        
+
         // Wait until a change has happened
         generation_.wait(initial_ct, std::memory_order_acquire);
 
-        // If we make it here, our thread has been notified, and the value underlying generation_ 
+        // If we make it here, our thread has been notified, and the value underlying generation_
         // has changed - we should exit our wait and reacquire the lock
         lock.lock();
     }
