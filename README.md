@@ -1,11 +1,9 @@
 # replusplus
 Reimplementing C++ STL containers for learning sake.
 
-Working on an overhaul in [roadmap.md](./roadmap.md).
-
 ## build/usage
 
-replusplus is currently a header only C++20 library.
+Header only, C++20.
 
 Configure and build:
 

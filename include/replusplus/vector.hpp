@@ -290,7 +290,11 @@ public:
 
         size_ = desired_size;
     }
-    void swap(vector& other) {}
+    void swap(vector& other) noexcept {
+        std::swap(data_, other.data_);
+        std::swap(size_, other.size_);
+        std::swap(capacity_, other.capacity_);
+    }
 
     bool operator==(const vector& other) const {
         if (size_ == other.size_) {
